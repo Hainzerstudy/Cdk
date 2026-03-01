@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora CDK</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Calculadora CDK</h1>
+
+    <!-- Función respiratoria -->
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">D1 – Función respiratoria:</label>
+      <select id="d1" class="w-full p-2 border rounded">
+        <option value="0">0 – Sin oxígeno</option>
+        <option value="1">1 – O₂ bajo flujo</option>
+        <option value="2">2 – O₂ alto flujo / Venturi</option>
+        <option value="3">3 – VNI (CPAP/BiPAP)</option>
+        <option value="4">4 – VM invasiva</option>
+      </select>
+    </div>
+
+    <!-- Movilidad funcional -->
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">D2 – Movilidad funcional:</label>
+      <select id="d2base" class="w-full p-2 border rounded">
+        <option value="0">0 – Independiente</option>
+        <option value="1">1 – Dependencia leve</option>
+        <option value="2">2 – Dependencia moderada</option>
+        <option value="3">3 – Dependencia severa</option>
+        <option value="4">4 – Postrado</option>
+      </select>
+    </div>
+
+    <!-- Déficit neurológico -->
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">¿Déficit neurológico?</label>
+      <select id="neuro" class="w-full p-2 border rounded">
+        <option value="no">No</option>
+        <option value="si">Sí</option>
+      </select>
+    </div>
+
+    <!-- Subpreguntas neuro -->
+    <div id="neuroQuestions" class="mb-4 hidden">
+      <label class="block font-semibold mb-2">Ajuste neuro:</label>
+
+      <div class="mb-2">
+        <label>1. ¿Se sienta solo a borde de cama?</label>
+        <select id="q1" class="w-full p-1 border rounded">
+          <option value="0">Sí</option>
+          <option value="1">No</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label>2. ¿Puede mantenerse de pie con apoyo?</label>
+        <select id="q2" class="w-full p-1 border rounded">
+          <option value="0">Sí</option>
+          <option value="1">No</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label>3. ¿Puede caminar con ayuda mínima o supervisión?</label>
+        <select id="q3" class="w-full p-1 border rounded">
+          <option value="0">Sí</option>
+          <option value="1">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Secreciones -->
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">D3 – Manejo de secreciones:</label>
+      <select id="d3" class="w-full p-2 border rounded">
+        <option value="0">0 – Sin secreciones</option>
+        <option value="1">1 – Leves</option>
+        <option value="2">2 – Moderadas</option>
+        <option value="3">3 – Abundantes / riesgo</option>
+      </select>
+    </div>
+
+    <!-- Nivel actividad -->
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">D4 – Nivel de actividad / PRF:</label>
+      <select id="d4" class="w-full p-2 border rounded">
+        <option value="0">0 – Sin indicación</option>
+        <option value="1">1 – Pasiva / preventiva</option>
+        <option value="2">2 – Activa en cama</option>
+        <option value="3">3 – Activa fuera de cama</option>
+      </select>
+    </div>
+
+    <button id="calcBtn" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700">Calcular CDK</button>
+
+    <div id="resultado" class="mt-4 p-4 rounded text-center font-bold text-lg"></div>
+  </div>
+
+  <script>
+    const neuroSelect = document.getElementById("neuro");
+    const neuroQuestions = document.getElementById("neuroQuestions");
+
+    neuroSelect.addEventListener("change", () => {
+      neuroQuestions.classList.toggle("hidden", neuroSelect.value === "no");
+    });
+
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const d1 = parseFloat(document.getElementById("d1").value) * 1.5;
+      let d2Base = parseFloat(document.getElementById("d2base").value);
+      let ajusteNeuro = 0;
+
+      if (neuroSelect.value === "si") {
+        ajusteNeuro += parseFloat(document.getElementById("q1").value);
+        ajusteNeuro += parseFloat(document.getElementById("q2").value);
+        ajusteNeuro += parseFloat(document.getElementById("q3").value);
+      }
+
+      let d2Total = d2Base + ajusteNeuro;
+      if (d2Total > 4) d2Total = 4;
+      d2Total = d2Total * (neuroSelect.value === "si" ? 1.2 : 1);
+
+      const d3 = parseFloat(document.getElementById("d3").value);
+      const d4 = parseFloat(document.getElementById("d4").value);
+
+      const cdkTotal = d1 + d2Total + d3 + d4;
+
+      let categoria = "";
+      let color = "";
+
+      if (cdkTotal >= 10) { categoria = "A – Alta"; color = "bg-red-500 text-white"; }
+      else if (cdkTotal >= 6) { categoria = "B – Media"; color = "bg-blue-500 text-white"; }
+      else if (cdkTotal >= 3) { categoria = "C – Baja"; color = "bg-green-500 text-white"; }
+      else { categoria = "D – Muy baja"; color = "bg-gray-300 text-black"; }
+
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.innerHTML = `CDK Total: ${cdkTotal.toFixed(1)}<br>Categoría: ${categoria}`;
+      resultadoDiv.className = `mt-4 p-4 rounded text-center font-bold text-lg ${color}`;
+    });
+  </script>
+
+</body>
+</html>
