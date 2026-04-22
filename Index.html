@@ -1,146 +1,177 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora CDK</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPK-R75 Clínico</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    padding:20px;
+}
+.container {
+    max-width:600px;
+    margin:auto;
+    background:#0b0b0b;
+    padding:20px;
+    border-radius:12px;
+}
+h1 { text-align:center; color:#00ffd5; }
+
+label { margin-top:15px; display:block; font-weight:bold; }
+
+select,button {
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border-radius:8px;
+    border:none;
+}
+
+button {
+    background:#00ffd5;
+    color:black;
+    font-weight:bold;
+}
+
+.result {
+    margin-top:20px;
+    padding:15px;
+    background:#1c1c1c;
+    border-radius:10px;
+}
+</style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
-    <h1 class="text-2xl font-bold mb-4 text-center">Calculadora CDK</h1>
+<body>
+<div class="container">
+<h1>IPK-R75 Clínico</h1>
 
-    <!-- Función respiratoria -->
-    <div class="mb-4">
-      <label class="block font-semibold mb-1">D1 – Función respiratoria:</label>
-      <select id="d1" class="w-full p-2 border rounded">
-        <option value="0">0 – Sin oxígeno</option>
-        <option value="1">1 – O₂ bajo flujo</option>
-        <option value="2">2 – O₂ alto flujo / Venturi</option>
-        <option value="3">3 – VNI (CPAP/BiPAP)</option>
-        <option value="4">4 – VM invasiva</option>
-      </select>
-    </div>
+<label>¿Acepta intervención?</label>
+<select id="acepta">
+<option value="no">Rechaza intervención</option>
+<option value="si">Acepta intervención</option>
+</select>
 
-    <!-- Movilidad funcional -->
-    <div class="mb-4">
-      <label class="block font-semibold mb-1">D2 – Movilidad funcional:</label>
-      <select id="d2base" class="w-full p-2 border rounded">
-        <option value="0">0 – Independiente</option>
-        <option value="1">1 – Dependencia leve</option>
-        <option value="2">2 – Dependencia moderada</option>
-        <option value="3">3 – Dependencia severa</option>
-        <option value="4">4 – Postrado</option>
-      </select>
-    </div>
+<label>Edad</label>
+<select id="edad">
+<option value="0">≥75 años</option>
+<option value="5"><75 años</option>
+</select>
 
-    <!-- Déficit neurológico -->
-    <div class="mb-4">
-      <label class="block font-semibold mb-1">¿Déficit neurológico?</label>
-      <select id="neuro" class="w-full p-2 border rounded">
-        <option value="no">No</option>
-        <option value="si">Sí</option>
-      </select>
-    </div>
+<label>Estabilidad hemodinámica</label>
+<select id="v1">
+<option value="0">Inestable</option>
+<option value="5">Estable con límites</option>
+<option value="10">Estable</option>
+</select>
 
-    <!-- Subpreguntas neuro -->
-    <div id="neuroQuestions" class="mb-4 hidden">
-      <label class="block font-semibold mb-2">Ajuste neuro:</label>
+<label>Reserva funcional</label>
+<select id="v2">
+<option value="0">Dependiente severo</option>
+<option value="5">Dependencia parcial</option>
+<option value="10">Independiente</option>
+</select>
 
-      <div class="mb-2">
-        <label>1. ¿Se sienta solo a borde de cama?</label>
-        <select id="q1" class="w-full p-1 border rounded">
-          <option value="0">Sí</option>
-          <option value="1">No</option>
-        </select>
-      </div>
+<label>Complejidad clínica</label>
+<select id="v3">
+<option value="0">Alta complejidad</option>
+<option value="5">Controlada</option>
+<option value="10">Baja</option>
+</select>
 
-      <div class="mb-2">
-        <label>2. ¿Puede mantenerse de pie con apoyo?</label>
-        <select id="q2" class="w-full p-1 border rounded">
-          <option value="0">Sí</option>
-          <option value="1">No</option>
-        </select>
-      </div>
+<label>Red de apoyo</label>
+<select id="v4">
+<option value="0">Ausente</option>
+<option value="3">Parcial</option>
+<option value="5">Sólida</option>
+</select>
 
-      <div class="mb-2">
-        <label>3. ¿Puede caminar con ayuda mínima o supervisión?</label>
-        <select id="q3" class="w-full p-1 border rounded">
-          <option value="0">Sí</option>
-          <option value="1">No</option>
-        </select>
-      </div>
-    </div>
+<label>Motivación</label>
+<select id="v5">
+<option value="0">Baja</option>
+<option value="3">Variable</option>
+<option value="5">Alta</option>
+</select>
 
-    <!-- Secreciones -->
-    <div class="mb-4">
-      <label class="block font-semibold mb-1">D3 – Manejo de secreciones:</label>
-      <select id="d3" class="w-full p-2 border rounded">
-        <option value="0">0 – Sin secreciones</option>
-        <option value="1">1 – Leves</option>
-        <option value="2">2 – Moderadas</option>
-        <option value="3">3 – Abundantes / riesgo</option>
-      </select>
-    </div>
+<h3>Juicio clínico</h3>
 
-    <!-- Nivel actividad -->
-    <div class="mb-4">
-      <label class="block font-semibold mb-1">D4 – Nivel de actividad / PRF:</label>
-      <select id="d4" class="w-full p-2 border rounded">
-        <option value="0">0 – Sin indicación</option>
-        <option value="1">1 – Pasiva / preventiva</option>
-        <option value="2">2 – Activa en cama</option>
-        <option value="3">3 – Activa fuera de cama</option>
-      </select>
-    </div>
+<select id="j1"><option value="0">Edad funcional baja</option><option value="2">Media</option><option value="4">Alta</option></select>
+<select id="j2"><option value="0">Motivación baja</option><option value="2">Media</option><option value="4">Alta</option></select>
+<select id="j3"><option value="0">Adherencia baja</option><option value="2">Media</option><option value="4">Alta</option></select>
+<select id="j4"><option value="0">Apoyo nulo</option><option value="2">Parcial</option><option value="4">Alto</option></select>
+<select id="j5"><option value="0">No reversible</option><option value="2">Parcial</option><option value="4">Alta reversibilidad</option></select>
 
-    <button id="calcBtn" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700">Calcular CDK</button>
+<button onclick="calc()">Calcular</button>
 
-    <div id="resultado" class="mt-4 p-4 rounded text-center font-bold text-lg"></div>
-  </div>
+<div class="result" id="res"></div>
 
-  <script>
-    const neuroSelect = document.getElementById("neuro");
-    const neuroQuestions = document.getElementById("neuroQuestions");
+</div>
 
-    neuroSelect.addEventListener("change", () => {
-      neuroQuestions.classList.toggle("hidden", neuroSelect.value === "no");
-    });
+<script>
+function calc(){
 
-    document.getElementById("calcBtn").addEventListener("click", () => {
-      const d1 = parseFloat(document.getElementById("d1").value) * 1.5;
-      let d2Base = parseFloat(document.getElementById("d2base").value);
-      let ajusteNeuro = 0;
+if(acepta.value=="no"){
+res.innerHTML="❌ Rechazo → Educación / alta kinésica";
+return;
+}
 
-      if (neuroSelect.value === "si") {
-        ajusteNeuro += parseFloat(document.getElementById("q1").value);
-        ajusteNeuro += parseFloat(document.getElementById("q2").value);
-        ajusteNeuro += parseFloat(document.getElementById("q3").value);
-      }
+let juicio=+j1.value+ +j2.value+ +j3.value+ +j4.value+ +j5.value;
 
-      let d2Total = d2Base + ajusteNeuro;
-      if (d2Total > 4) d2Total = 4;
-      d2Total = d2Total * (neuroSelect.value === "si" ? 1.2 : 1);
+let total=
++edad.value+
++v1.value+
++v2.value+
++v3.value+
++v4.value+
++v5.value+
+juicio;
 
-      const d3 = parseFloat(document.getElementById("d3").value);
-      const d4 = parseFloat(document.getElementById("d4").value);
+let salida="";
 
-      const cdkTotal = d1 + d2Total + d3 + d4;
+if(total>=52){
+salida=`
+🅰️ MUY FAVORABLE<br>
+Perfil: paciente subagudo con alta reserva<br>
+Objetivo: recuperar / optimizar función<br>
+Frecuencia: diaria o intensiva<br>
+Tiempo: 45–60 min
+`;
+}
+else if(total>=36){
+salida=`
+🅱️ FAVORABLE<br>
+Perfil: potencial funcional conservado<br>
+Objetivo: mejorar capacidad y prevenir deterioro<br>
+Frecuencia: 3–5 veces/semana<br>
+Tiempo: 30–40 min
+`;
+}
+else if(total>=20){
+salida=`
+🅲 CONDICIONADO<br>
+Perfil: reserva limitada<br>
+Objetivo: mantener / enlentecer deterioro<br>
+Frecuencia: 2–3 veces/semana<br>
+Tiempo: 15–20 min
+`;
+}
+else{
+salida=`
+🅳 DESFAVORABLE<br>
+Perfil: bajo potencial funcional<br>
+Objetivo: confort, educación, posicionamiento<br>
+Frecuencia: eventual<br>
+Tiempo: 5–10 min
+`;
+}
 
-      let categoria = "";
-      let color = "";
-
-      if (cdkTotal >= 10) { categoria = "A – Alta"; color = "bg-red-500 text-white"; }
-      else if (cdkTotal >= 6) { categoria = "B – Media"; color = "bg-blue-500 text-white"; }
-      else if (cdkTotal >= 3) { categoria = "C – Baja"; color = "bg-green-500 text-white"; }
-      else { categoria = "D – Muy baja"; color = "bg-gray-300 text-black"; }
-
-      const resultadoDiv = document.getElementById("resultado");
-      resultadoDiv.innerHTML = `CDK Total: ${cdkTotal.toFixed(1)}<br>Categoría: ${categoria}`;
-      resultadoDiv.className = `mt-4 p-4 rounded text-center font-bold text-lg ${color}`;
-    });
-  </script>
+res.innerHTML=`Puntaje: ${total}/65<br><br>${salida}`;
+}
+</script>
 
 </body>
 </html>
