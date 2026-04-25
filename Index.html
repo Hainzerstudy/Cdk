@@ -3,12 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Cloud</title>
+<title>IPK-R65 Hospitalario</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f2027">
-
-<!-- Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -20,7 +16,7 @@ body {
 }
 
 .container {
-    max-width:650px;
+    max-width:700px;
     margin:auto;
     background:#0b0b0b;
     padding:20px;
@@ -29,22 +25,19 @@ body {
 
 h1 { text-align:center; color:#00ffd5; }
 
-label { display:block; margin-top:12px; font-weight:bold; }
-
-select, input, button {
+input, select, button {
     width:100%;
     padding:10px;
-    margin-top:5px;
+    margin-top:6px;
     border-radius:8px;
     border:none;
 }
 
 button {
     background:#00ffd5;
-    color:black;
     font-weight:bold;
-    margin-top:12px;
     cursor:pointer;
+    margin-top:10px;
 }
 
 .result {
@@ -61,10 +54,25 @@ button {
 
 <div class="container">
 
-<h1>IPK-R65 Cloud</h1>
+<h1>IPK-R65 Hospitalario</h1>
 
-<label>ID Paciente</label>
-<input id="paciente" placeholder="Ej: HSJ-001">
+<!-- 🔐 LOGIN -->
+<h3>Acceso clínico</h3>
+
+<input id="email" placeholder="correo institucional">
+<input id="pass" type="password" placeholder="contraseña">
+
+<button onclick="login()">Ingresar</button>
+<button onclick="logout()">Salir</button>
+
+<div id="userInfo"></div>
+
+<hr>
+
+<!-- 📊 PACIENTE -->
+<h3>Evaluación clínica</h3>
+
+<input id="paciente" placeholder="ID paciente">
 
 <label>Estabilidad hemodinámica</label>
 <select id="hemo">
@@ -80,21 +88,21 @@ button {
 
 <label>Edad funcional</label>
 <select id="edad">
-<option value="0">≥65 años</option>
-<option value="5"><65 años</option>
+<option value="0">≥65</option>
+<option value="5"><65</option>
 </select>
 
 <label>Reserva funcional</label>
 <select id="v1">
-<option value="0">Severa dependencia</option>
+<option value="0">Severa</option>
 <option value="5">Parcial</option>
 <option value="10">Independiente</option>
 </select>
 
-<label>Complejidad clínica</label>
+<label>Complejidad</label>
 <select id="v2">
 <option value="0">Alta</option>
-<option value="5">Controlada</option>
+<option value="5">Media</option>
 <option value="10">Baja</option>
 </select>
 
@@ -102,7 +110,7 @@ button {
 <select id="v3">
 <option value="0">Sin apoyo</option>
 <option value="3">Parcial</option>
-<option value="5">Sólida</option>
+<option value="5">Fuerte</option>
 </select>
 
 <label>Motivación</label>
@@ -112,26 +120,26 @@ button {
 <option value="5">Alta</option>
 </select>
 
-<h3>Juicio kinésico</h3>
+<h4>Juicio kinésico</h4>
 
 <label>Edad funcional clínica</label>
 <select id="j1">
-<option value="0">Muy baja</option>
-<option value="2">Intermedia</option>
+<option value="0">Baja</option>
+<option value="2">Media</option>
 <option value="4">Alta</option>
 </select>
 
 <label>Motivación observada</label>
 <select id="j2">
 <option value="0">Nula</option>
-<option value="2">Intermitente</option>
+<option value="2">Parcial</option>
 <option value="4">Alta</option>
 </select>
 
-<label>Adherencia esperada</label>
+<label>Adherencia</label>
 <select id="j3">
 <option value="0">Baja</option>
-<option value="2">Parcial</option>
+<option value="2">Media</option>
 <option value="4">Alta</option>
 </select>
 
@@ -142,15 +150,15 @@ button {
 <option value="4">Constante</option>
 </select>
 
-<label>Tolerancia al esfuerzo</label>
+<label>Tolerancia esfuerzo</label>
 <select id="j5">
-<option value="0">Muy baja</option>
+<option value="0">Baja</option>
 <option value="2">Moderada</option>
 <option value="4">Alta</option>
 </select>
 
-<button onclick="calc()">Evaluar y guardar</button>
-<button onclick="verHistorial()">Ver historial</button>
+<button onclick="evaluar()">Evaluar y guardar</button>
+<button onclick="verHistorial()">Historial clínico</button>
 <button onclick="exportarExcel()">Exportar Excel</button>
 
 <div class="result" id="res"></div>
@@ -162,108 +170,139 @@ button {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } 
-from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { 
+getAuth,
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+query,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "irat-5-evaluaciones.firebaseapp.com",
-  databaseURL: "https://irat-5-evaluaciones-default-rtdb.firebaseio.com",
-  projectId: "irat-5-evaluaciones",
-  storageBucket: "irat-5-evaluaciones.firebasestorage.app",
-  messagingSenderId: "487279274410",
-  appId: "1:487279274410:web:146e9c35a0bf795c5423d3"
+apiKey: "TU_API_KEY",
+authDomain: "irat-5-evaluaciones.firebaseapp.com",
+projectId: "irat-5-evaluaciones",
+storageBucket: "irat-5-evaluaciones.appspot.com",
+messagingSenderId: "487279274410",
+appId: "1:487279274410:web:146e9c35a0bf795c5423d3"
 };
 
 const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
 const db = getFirestore(app);
 
+window.auth = auth;
 window.db = db;
-window.fb = { collection, addDoc, getDocs, query, orderBy };
+window.fb = { 
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut,
+collection,
+addDoc,
+getDocs,
+query,
+orderBy
+};
 
 </script>
 
 <!-- ================= LOGIC ================= -->
 <script>
 
-async function guardarEvaluacion(data){
-    try {
-        await window.fb.addDoc(
-            window.fb.collection(window.db, "evaluaciones_ipk"),
-            data
-        );
-    } catch(e){
-        console.error(e);
-    }
+let user = null;
+
+/* 🔐 AUTH */
+async function login(){
+let email = document.getElementById("email").value;
+let pass = document.getElementById("pass").value;
+
+try{
+await window.fb.signInWithEmailAndPassword(window.auth,email,pass);
+}catch(e){
+alert("Error login");
+}
 }
 
-async function calc(){
+async function logout(){
+await window.fb.signOut(window.auth);
+}
+
+window.fb.onAuthStateChanged(window.auth,(u)=>{
+user = u;
+document.getElementById("userInfo").innerHTML =
+u ? "👤 " + u.email : "Sin sesión";
+});
+
+/* 💾 GUARDAR */
+async function guardar(data){
+
+if(!user){
+alert("Debe iniciar sesión");
+return;
+}
+
+await window.fb.addDoc(
+window.fb.collection(window.db,"evaluaciones_ipk"),
+{
+...data,
+evaluadorUID:user.uid,
+evaluadorEmail:user.email
+}
+);
+}
+
+/* 📊 EVALUACIÓN */
+async function evaluar(){
 
 let hemo = document.getElementById("hemo").value;
 let acepta = document.getElementById("acepta").value;
 
-if(hemo === "no"){
-document.getElementById("res").innerHTML="🚫 No estable";
+if(hemo==="no"){
+document.getElementById("res").innerHTML="No estable";
 return;
 }
 
-if(acepta === "no"){
-document.getElementById("res").innerHTML="❌ No acepta intervención";
+if(acepta==="no"){
+document.getElementById("res").innerHTML="No acepta intervención";
 return;
 }
-
-let j1 = +document.getElementById("j1").value;
-let j2 = +document.getElementById("j2").value;
-let j3 = +document.getElementById("j3").value;
-let j4 = +document.getElementById("j4").value;
-let j5 = +document.getElementById("j5").value;
-
-let juicio = j1+j2+j3+j4+j5;
 
 let total =
-+document.getElementById("edad").value +
-+document.getElementById("v1").value +
-+document.getElementById("v2").value +
-+document.getElementById("v3").value +
-+document.getElementById("v4").value +
-juicio;
++edad.value + +v1.value + +v2.value + +v3.value + +v4.value +
++j1.value + +j2.value + +j3.value + +j4.value + +j5.value;
 
-let soporte = +document.getElementById("v3").value + j4 + +document.getElementById("v4").value;
+let soporte = +v3.value + +j4.value + +v4.value;
 
-let interpretacion = "";
-let objetivos = "";
+let interpretacion =
+total>=40 ? "Alto beneficio" :
+total>=25 ? "Intermedio" :
+soporte>=6 ? "Bajo rehabilitador / preventivo" :
+"Bajo global";
 
-if(total >= 40){
-interpretacion="🟢 Alto beneficio rehabilitador";
-objetivos="Recuperación funcional";
-}
-else if(total >= 25){
-interpretacion="🟡 Beneficio intermedio";
-objetivos="Mantención funcional";
-}
-else{
-interpretacion = soporte >= 6 ?
-"🔴 Bajo rehabilitador, alto preventivo" :
-"⚫ Bajo beneficio global";
-objetivos="Cuidados básicos";
-}
-
-let paciente = document.getElementById("paciente").value || "sin-id";
-
-let evaluacion = {
-paciente,
-fecha: new Date().toISOString(),
+let data = {
+paciente:paciente.value || "sin-id",
+fecha:new Date().toISOString(),
 total,
 interpretacion,
 soporte
 };
 
-await guardarEvaluacion(evaluacion);
+await guardar(data);
 
 document.getElementById("res").innerHTML =
 `<b>${interpretacion}</b><br>Puntaje: ${total}`;
 }
 
+/* 📂 HISTORIAL */
 async function verHistorial(){
 
 let q = window.fb.query(
@@ -273,11 +312,12 @@ window.fb.orderBy("fecha","desc")
 
 let snap = await window.fb.getDocs(q);
 
-let html = "<h3>Historial Cloud</h3>";
+let html = "<h3>Historial clínico</h3>";
 
 snap.forEach(d=>{
-let h = d.data();
-html += `
+let h=d.data();
+
+html+=`
 <div class="result">
 <b>${h.paciente}</b><br>
 ${new Date(h.fecha).toLocaleString()}<br>
@@ -288,6 +328,7 @@ ${h.total} - ${h.interpretacion}
 document.getElementById("historial").innerHTML = html;
 }
 
+/* 📤 EXCEL */
 async function exportarExcel(){
 
 let snap = await window.fb.getDocs(
@@ -299,14 +340,15 @@ Paciente:d.data().paciente,
 Fecha:new Date(d.data().fecha).toLocaleString(),
 Puntaje:d.data().total,
 Interpretacion:d.data().interpretacion,
-Soporte:d.data().soporte
+Soporte:d.data().soporte,
+Evaluador:d.data().evaluadorEmail
 }));
 
-let ws = XLSX.utils.json_to_sheet(data);
-let wb = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb, ws, "IPK_R65");
+let ws=XLSX.utils.json_to_sheet(data);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"IPK_R65");
 
-XLSX.writeFile(wb,"IPK_R65_cloud.xlsx");
+XLSX.writeFile(wb,"IPK_R65_hospital.xlsx");
 }
 
 </script>
