@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Clínico</title>
+<title>IPK-R65 Cloud</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f2027">
 
-<!-- Excel export -->
+<!-- Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -20,25 +20,16 @@ body {
 }
 
 .container {
-    max-width:600px;
+    max-width:650px;
     margin:auto;
     background:#0b0b0b;
     padding:20px;
     border-radius:12px;
 }
 
-h1 {
-    text-align:center;
-    color:#00ffd5;
-}
+h1 { text-align:center; color:#00ffd5; }
 
-label {
-    display:block;
-    margin-top:14px;
-    font-weight:bold;
-}
-
-small { color:#ccc; }
+label { display:block; margin-top:12px; font-weight:bold; }
 
 select, input, button {
     width:100%;
@@ -52,50 +43,51 @@ button {
     background:#00ffd5;
     color:black;
     font-weight:bold;
-    margin-top:15px;
+    margin-top:12px;
     cursor:pointer;
 }
 
 .result {
-    margin-top:20px;
-    padding:15px;
+    margin-top:15px;
+    padding:12px;
     background:#1c1c1c;
     border-radius:10px;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>IPK-R65</h1>
+<h1>IPK-R65 Cloud</h1>
 
 <label>ID Paciente</label>
 <input id="paciente" placeholder="Ej: HSJ-001">
 
-<label>¿Paciente hemodinámicamente estable?</label>
+<label>Estabilidad hemodinámica</label>
 <select id="hemo">
 <option value="no">No estable</option>
 <option value="si">Estable</option>
 </select>
 
-<label>¿Acepta intervención kinésica?</label>
+<label>Acepta intervención</label>
 <select id="acepta">
 <option value="no">No</option>
 <option value="si">Sí</option>
 </select>
 
-<label>Grupo etario funcional</label>
+<label>Edad funcional</label>
 <select id="edad">
 <option value="0">≥65 años</option>
 <option value="5"><65 años</option>
 </select>
 
-<label>Reserva funcional basal</label>
+<label>Reserva funcional</label>
 <select id="v1">
-<option value="0">Dependencia severa</option>
-<option value="5">Dependencia parcial</option>
+<option value="0">Severa dependencia</option>
+<option value="5">Parcial</option>
 <option value="10">Independiente</option>
 </select>
 
@@ -113,30 +105,30 @@ button {
 <option value="5">Sólida</option>
 </select>
 
-<label>Motivación / adherencia</label>
+<label>Motivación</label>
 <select id="v4">
 <option value="0">Baja</option>
 <option value="3">Variable</option>
 <option value="5">Alta</option>
 </select>
 
-<h3>Juicio clínico kinésico</h3>
+<h3>Juicio kinésico</h3>
 
-<label>Edad funcional</label>
+<label>Edad funcional clínica</label>
 <select id="j1">
 <option value="0">Muy baja</option>
 <option value="2">Intermedia</option>
 <option value="4">Alta</option>
 </select>
 
-<label>Motivación observable</label>
+<label>Motivación observada</label>
 <select id="j2">
 <option value="0">Nula</option>
 <option value="2">Intermitente</option>
 <option value="4">Alta</option>
 </select>
 
-<label>Adherencia esperable</label>
+<label>Adherencia esperada</label>
 <select id="j3">
 <option value="0">Baja</option>
 <option value="2">Parcial</option>
@@ -157,35 +149,66 @@ button {
 <option value="4">Alta</option>
 </select>
 
-<button onclick="calc()">Evaluar paciente</button>
+<button onclick="calc()">Evaluar y guardar</button>
 <button onclick="verHistorial()">Ver historial</button>
-<button onclick="exportarExcel()">Exportar a Excel</button>
+<button onclick="exportarExcel()">Exportar Excel</button>
 
 <div class="result" id="res"></div>
 <div class="result" id="historial"></div>
 
 </div>
 
+<!-- ================= FIREBASE ================= -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy } 
+from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "irat-5-evaluaciones.firebaseapp.com",
+  databaseURL: "https://irat-5-evaluaciones-default-rtdb.firebaseio.com",
+  projectId: "irat-5-evaluaciones",
+  storageBucket: "irat-5-evaluaciones.firebasestorage.app",
+  messagingSenderId: "487279274410",
+  appId: "1:487279274410:web:146e9c35a0bf795c5423d3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.fb = { collection, addDoc, getDocs, query, orderBy };
+
+</script>
+
+<!-- ================= LOGIC ================= -->
 <script>
 
-function guardarEvaluacion(data){
-    let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
-    historial.push(data);
-    localStorage.setItem("ipk_historial", JSON.stringify(historial));
+async function guardarEvaluacion(data){
+    try {
+        await window.fb.addDoc(
+            window.fb.collection(window.db, "evaluaciones_ipk"),
+            data
+        );
+    } catch(e){
+        console.error(e);
+    }
 }
 
-function calc(){
+async function calc(){
 
-const hemo = document.getElementById("hemo").value;
-const acepta = document.getElementById("acepta").value;
+let hemo = document.getElementById("hemo").value;
+let acepta = document.getElementById("acepta").value;
 
 if(hemo === "no"){
-document.getElementById("res").innerHTML="🚫 Paciente no estable → manejo básico.";
+document.getElementById("res").innerHTML="🚫 No estable";
 return;
 }
 
 if(acepta === "no"){
-document.getElementById("res").innerHTML="❌ No acepta intervención → educación.";
+document.getElementById("res").innerHTML="❌ No acepta intervención";
 return;
 }
 
@@ -195,37 +218,34 @@ let j3 = +document.getElementById("j3").value;
 let j4 = +document.getElementById("j4").value;
 let j5 = +document.getElementById("j5").value;
 
-let juicio = j1 + j2 + j3 + j4 + j5;
+let juicio = j1+j2+j3+j4+j5;
 
-let edad = +document.getElementById("edad").value;
-let v1 = +document.getElementById("v1").value;
-let v2 = +document.getElementById("v2").value;
-let v3 = +document.getElementById("v3").value;
-let v4 = +document.getElementById("v4").value;
+let total =
++document.getElementById("edad").value +
++document.getElementById("v1").value +
++document.getElementById("v2").value +
++document.getElementById("v3").value +
++document.getElementById("v4").value +
+juicio;
 
-let total = edad + v1 + v2 + v3 + v4 + juicio;
-let soporte = v3 + j4 + v4;
+let soporte = +document.getElementById("v3").value + j4 + +document.getElementById("v4").value;
 
 let interpretacion = "";
 let objetivos = "";
 
 if(total >= 40){
 interpretacion="🟢 Alto beneficio rehabilitador";
-objetivos="Recuperación funcional y entrenamiento progresivo.";
+objetivos="Recuperación funcional";
 }
 else if(total >= 25){
 interpretacion="🟡 Beneficio intermedio";
-objetivos="Mantención funcional y prevención de deterioro.";
+objetivos="Mantención funcional";
 }
 else{
-if(soporte >= 6){
-interpretacion="🔴 Bajo beneficio rehabilitador, alto preventivo";
-objetivos="Prevención de complicaciones y manejo básico.";
-}
-else{
-interpretacion="⚫ Bajo beneficio global";
-objetivos="Cuidados básicos y confort.";
-}
+interpretacion = soporte >= 6 ?
+"🔴 Bajo rehabilitador, alto preventivo" :
+"⚫ Bajo beneficio global";
+objetivos="Cuidados básicos";
 }
 
 let paciente = document.getElementById("paciente").value || "sin-id";
@@ -238,64 +258,55 @@ interpretacion,
 soporte
 };
 
-guardarEvaluacion(evaluacion);
+await guardarEvaluacion(evaluacion);
 
-document.getElementById("res").innerHTML = `
-<b>Puntaje:</b> ${total}<br><br>
-<b>${interpretacion}</b><br><br>
-<b>Objetivos:</b> ${objetivos}
-`;
+document.getElementById("res").innerHTML =
+`<b>${interpretacion}</b><br>Puntaje: ${total}`;
 }
 
-function verHistorial(){
-let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
+async function verHistorial(){
 
-if(historial.length === 0){
-document.getElementById("historial").innerHTML="Sin registros.";
-return;
-}
+let q = window.fb.query(
+window.fb.collection(window.db,"evaluaciones_ipk"),
+window.fb.orderBy("fecha","desc")
+);
 
-let html = "<h3>Historial</h3>";
+let snap = await window.fb.getDocs(q);
 
-historial.slice().reverse().forEach(h=>{
+let html = "<h3>Historial Cloud</h3>";
+
+snap.forEach(d=>{
+let h = d.data();
 html += `
-<div style="padding:10px;margin-bottom:10px;background:#222;border-radius:8px;">
-<b>Paciente:</b> ${h.paciente}<br>
-<b>Fecha:</b> ${new Date(h.fecha).toLocaleString()}<br>
-<b>Puntaje:</b> ${h.total}<br>
-<b>${h.interpretacion}</b>
+<div class="result">
+<b>${h.paciente}</b><br>
+${new Date(h.fecha).toLocaleString()}<br>
+${h.total} - ${h.interpretacion}
 </div>`;
 });
 
 document.getElementById("historial").innerHTML = html;
 }
 
-function exportarExcel(){
+async function exportarExcel(){
 
-let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
+let snap = await window.fb.getDocs(
+window.fb.collection(window.db,"evaluaciones_ipk")
+);
 
-if(historial.length === 0){
-alert("Sin datos");
-return;
-}
-
-let data = historial.map(h=>({
-Paciente: h.paciente,
-Fecha: new Date(h.fecha).toLocaleString(),
-Puntaje: h.total,
-Interpretacion: h.interpretacion,
-Soporte: h.soporte
+let data = snap.docs.map(d=>({
+Paciente:d.data().paciente,
+Fecha:new Date(d.data().fecha).toLocaleString(),
+Puntaje:d.data().total,
+Interpretacion:d.data().interpretacion,
+Soporte:d.data().soporte
 }));
 
 let ws = XLSX.utils.json_to_sheet(data);
 let wb = XLSX.utils.book_new();
 XLSX.utils.book_append_sheet(wb, ws, "IPK_R65");
 
-XLSX.writeFile(wb, "IPK_R65_historial.xlsx");
-}
-
-if ('serviceWorker' in navigator) {
-navigator.serviceWorker.register('service-worker.js');
+XLSX.writeFile(wb,"IPK_R65_cloud.xlsx");
 }
 
 </script>
