@@ -9,45 +9,96 @@
 
 <style>
 body {
-    font-family: Arial;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:white;
-    padding:20px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0b1220;
+    color: #e6f1ff;
+    margin: 0;
+    padding: 20px;
 }
 
 .container {
-    max-width:700px;
-    margin:auto;
-    background:#0b0b0b;
-    padding:20px;
-    border-radius:12px;
+    max-width: 950px;
+    margin: auto;
+    background: #111a2e;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
 }
 
-h1 { text-align:center; color:#00ffd5; }
+h1 {
+    text-align: center;
+    color: #00ffd5;
+    margin-bottom: 20px;
+}
 
-input, select, button {
-    width:100%;
-    padding:10px;
-    margin-top:6px;
-    border-radius:8px;
-    border:none;
+.section {
+    background: #0f1b33;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #1f2d4a;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+    color: #a9c1ff;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #2b3c5f;
+    background: #0b1220;
+    color: #e6f1ff;
 }
 
 button {
-    background:#00ffd5;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary {
+    background: linear-gradient(90deg,#00ffd5,#00a3ff);
+    color: #001018;
+}
+
+.secondary {
+    background: #1c2a4a;
+    color: #e6f1ff;
+    border: 1px solid #2b3c5f;
 }
 
 .result {
-    margin-top:15px;
-    padding:12px;
-    background:#1c1c1c;
-    border-radius:10px;
+    margin-top: 15px;
+    padding: 15px;
+    background: #0b1220;
+    border-left: 4px solid #00ffd5;
+    border-radius: 10px;
+}
+
+.card {
+    background: #0b1220;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #1f2d4a;
+}
+
+#userInfo {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #7aa2ff;
 }
 </style>
-
 </head>
 
 <body>
@@ -56,23 +107,28 @@ button {
 
 <h1>IPK-R65 Hospitalario</h1>
 
-<!-- 🔐 LOGIN -->
-<h3>Acceso clínico</h3>
+<!-- LOGIN -->
+<div class="section">
+<h3>🔐 Acceso clínico</h3>
 
-<input id="email" placeholder="correo institucional">
-<input id="pass" type="password" placeholder="contraseña">
+<input id="email" placeholder="Correo institucional">
+<input id="pass" type="password" placeholder="Contraseña">
 
-<button onclick="login()">Ingresar</button>
-<button onclick="logout()">Salir</button>
+<button class="primary" onclick="login()">Ingresar</button>
+<button class="secondary" onclick="logout()">Cerrar sesión</button>
 
 <div id="userInfo"></div>
+</div>
 
-<hr>
+<!-- PACIENTE -->
+<div class="section">
+<h3>🧑‍⚕️ Paciente</h3>
+<input id="paciente" placeholder="ID paciente (ej: HSJ-001)">
+</div>
 
-<!-- 📊 PACIENTE -->
-<h3>Evaluación clínica</h3>
-
-<input id="paciente" placeholder="ID paciente">
+<!-- VARIABLES -->
+<div class="section">
+<h3>📊 Variables clínicas</h3>
 
 <label>Estabilidad hemodinámica</label>
 <select id="hemo">
@@ -119,58 +175,45 @@ button {
 <option value="3">Variable</option>
 <option value="5">Alta</option>
 </select>
+</div>
 
-<h4>Juicio kinésico</h4>
+<!-- JUICIO CLÍNICO -->
+<div class="section">
+<h3>🧠 Juicio kinésico</h3>
 
 <label>Edad funcional clínica</label>
-<select id="j1">
-<option value="0">Baja</option>
-<option value="2">Media</option>
-<option value="4">Alta</option>
-</select>
+<select id="j1"><option value="0">Baja</option><option value="2">Media</option><option value="4">Alta</option></select>
 
 <label>Motivación observada</label>
-<select id="j2">
-<option value="0">Nula</option>
-<option value="2">Parcial</option>
-<option value="4">Alta</option>
-</select>
+<select id="j2"><option value="0">Nula</option><option value="2">Parcial</option><option value="4">Alta</option></select>
 
 <label>Adherencia</label>
-<select id="j3">
-<option value="0">Baja</option>
-<option value="2">Media</option>
-<option value="4">Alta</option>
-</select>
+<select id="j3"><option value="0">Baja</option><option value="2">Media</option><option value="4">Alta</option></select>
 
 <label>Apoyo cuidador</label>
-<select id="j4">
-<option value="0">Ausente</option>
-<option value="2">Irregular</option>
-<option value="4">Constante</option>
-</select>
+<select id="j4"><option value="0">Ausente</option><option value="2">Irregular</option><option value="4">Constante</option></select>
 
 <label>Tolerancia esfuerzo</label>
-<select id="j5">
-<option value="0">Baja</option>
-<option value="2">Moderada</option>
-<option value="4">Alta</option>
-</select>
+<select id="j5"><option value="0">Baja</option><option value="2">Moderada</option><option value="4">Alta</option></select>
+</div>
 
-<button onclick="evaluar()">Evaluar y guardar</button>
-<button onclick="verHistorial()">Historial clínico</button>
-<button onclick="exportarExcel()">Exportar Excel</button>
+<!-- ACCIONES -->
+<div class="section">
+<button class="primary" onclick="evaluar()">Evaluar y guardar</button>
+<button class="secondary" onclick="verHistorial()">Ver historial</button>
+<button class="secondary" onclick="exportarExcel()">Exportar Excel</button>
+</div>
 
 <div class="result" id="res"></div>
-<div class="result" id="historial"></div>
+<div class="section" id="historial"></div>
 
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import { 
+import {
 getAuth,
 signInWithEmailAndPassword,
 onAuthStateChanged,
@@ -202,7 +245,7 @@ const db = getFirestore(app);
 
 window.auth = auth;
 window.db = db;
-window.fb = { 
+window.fb = {
 signInWithEmailAndPassword,
 onAuthStateChanged,
 signOut,
@@ -215,18 +258,19 @@ orderBy
 
 </script>
 
-<!-- ================= LOGIC ================= -->
+<!-- LOGIC -->
 <script>
 
 let user = null;
 
-/* 🔐 AUTH */
+/* AUTH */
 async function login(){
-let email = document.getElementById("email").value;
-let pass = document.getElementById("pass").value;
-
 try{
-await window.fb.signInWithEmailAndPassword(window.auth,email,pass);
+await window.fb.signInWithEmailAndPassword(
+window.auth,
+email.value,
+pass.value
+);
 }catch(e){
 alert("Error login");
 }
@@ -242,9 +286,8 @@ document.getElementById("userInfo").innerHTML =
 u ? "👤 " + u.email : "Sin sesión";
 });
 
-/* 💾 GUARDAR */
+/* GUARDAR */
 async function guardar(data){
-
 if(!user){
 alert("Debe iniciar sesión");
 return;
@@ -260,19 +303,16 @@ evaluadorEmail:user.email
 );
 }
 
-/* 📊 EVALUACIÓN */
+/* EVALUAR */
 async function evaluar(){
 
-let hemo = document.getElementById("hemo").value;
-let acepta = document.getElementById("acepta").value;
-
-if(hemo==="no"){
-document.getElementById("res").innerHTML="No estable";
+if(hemo.value==="no"){
+res.innerHTML="🚫 No estable";
 return;
 }
 
-if(acepta==="no"){
-document.getElementById("res").innerHTML="No acepta intervención";
+if(acepta.value==="no"){
+res.innerHTML="❌ No acepta intervención";
 return;
 }
 
@@ -283,10 +323,10 @@ let total =
 let soporte = +v3.value + +j4.value + +v4.value;
 
 let interpretacion =
-total>=40 ? "Alto beneficio" :
-total>=25 ? "Intermedio" :
-soporte>=6 ? "Bajo rehabilitador / preventivo" :
-"Bajo global";
+total>=40 ? "🟢 Alto beneficio" :
+total>=25 ? "🟡 Intermedio" :
+soporte>=6 ? "🔴 Preventivo" :
+"⚫ Bajo global";
 
 let data = {
 paciente:paciente.value || "sin-id",
@@ -298,11 +338,10 @@ soporte
 
 await guardar(data);
 
-document.getElementById("res").innerHTML =
-`<b>${interpretacion}</b><br>Puntaje: ${total}`;
+res.innerHTML = `<b>${interpretacion}</b><br>Puntaje: ${total}`;
 }
 
-/* 📂 HISTORIAL */
+/* HISTORIAL */
 async function verHistorial(){
 
 let q = window.fb.query(
@@ -316,19 +355,19 @@ let html = "<h3>Historial clínico</h3>";
 
 snap.forEach(d=>{
 let h=d.data();
-
 html+=`
-<div class="result">
+<div class="card">
 <b>${h.paciente}</b><br>
 ${new Date(h.fecha).toLocaleString()}<br>
-${h.total} - ${h.interpretacion}
+${h.total} - ${h.interpretacion}<br>
+${h.evaluadorEmail}
 </div>`;
 });
 
-document.getElementById("historial").innerHTML = html;
+historial.innerHTML = html;
 }
 
-/* 📤 EXCEL */
+/* EXCEL */
 async function exportarExcel(){
 
 let snap = await window.fb.getDocs(
