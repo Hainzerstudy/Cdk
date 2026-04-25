@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R75 Clínico</title>
+<title>IPK-R65 Clínico</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f2027">
@@ -15,7 +15,6 @@ body {
     color:white;
     padding:20px;
 }
-
 .container {
     max-width:600px;
     margin:auto;
@@ -23,23 +22,18 @@ body {
     padding:20px;
     border-radius:12px;
 }
-
 h1 {
     text-align:center;
     color:#00ffd5;
 }
-
 label {
     display:block;
     margin-top:14px;
     font-weight:bold;
 }
-
 small {
     color:#ccc;
-    display:block;
 }
-
 select, button {
     width:100%;
     padding:10px;
@@ -47,14 +41,12 @@ select, button {
     border-radius:8px;
     border:none;
 }
-
 button {
     background:#00ffd5;
     color:black;
     font-weight:bold;
     margin-top:20px;
 }
-
 .result {
     margin-top:20px;
     padding:15px;
@@ -68,10 +60,10 @@ button {
 
 <div class="container">
 
-<h1>IPK-R75</h1>
+<h1>IPK-R65</h1>
 
 <label>¿Paciente hemodinámicamente estable?</label>
-<small>Filtro de seguridad clínica</small>
+<small>Filtro de seguridad</small>
 <select id="hemo">
 <option value="no">No estable</option>
 <option value="si">Estable</option>
@@ -86,29 +78,29 @@ button {
 
 <label>Grupo etario funcional</label>
 <select id="edad">
-<option value="0">≥75 años (menor reserva)</option>
-<option value="5"><75 años (mayor reserva)</option>
+<option value="0">≥65 años</option>
+<option value="5"><65 años</option>
 </select>
 
 <label>Reserva funcional basal</label>
 <select id="v1">
-<option value="0">Dependencia severa / fragilidad avanzada</option>
+<option value="0">Dependencia severa</option>
 <option value="5">Dependencia parcial</option>
-<option value="10">Independiente / robusto</option>
+<option value="10">Independiente</option>
 </select>
 
-<label>Complejidad clínica / pronóstico</label>
+<label>Complejidad clínica</label>
 <select id="v2">
-<option value="0">Alta complejidad / baja reversibilidad</option>
-<option value="5">Comorbilidades controladas</option>
-<option value="10">Baja carga / buena reversibilidad</option>
+<option value="0">Alta complejidad</option>
+<option value="5">Controlada</option>
+<option value="10">Baja</option>
 </select>
 
 <label>Red de apoyo</label>
 <select id="v3">
 <option value="0">Sin apoyo</option>
-<option value="3">Apoyo parcial</option>
-<option value="5">Red sólida</option>
+<option value="3">Parcial</option>
+<option value="5">Sólida</option>
 </select>
 
 <label>Motivación / adherencia</label>
@@ -120,23 +112,23 @@ button {
 
 <h3>Juicio clínico kinésico</h3>
 
-<label>Edad funcional percibida</label>
+<label>Edad funcional</label>
 <select id="j1">
-<option value="0">Muy envejecido funcionalmente</option>
+<option value="0">Muy baja</option>
 <option value="2">Intermedia</option>
-<option value="4">Funcionalmente joven</option>
+<option value="4">Alta</option>
 </select>
 
 <label>Motivación observable</label>
 <select id="j2">
-<option value="0">Nula / resistencia</option>
+<option value="0">Nula</option>
 <option value="2">Intermitente</option>
 <option value="4">Alta</option>
 </select>
 
 <label>Adherencia esperable</label>
 <select id="j3">
-<option value="0">Baja probabilidad</option>
+<option value="0">Baja</option>
 <option value="2">Parcial</option>
 <option value="4">Alta</option>
 </select>
@@ -148,10 +140,10 @@ button {
 <option value="4">Constante</option>
 </select>
 
-<label>Reversibilidad funcional</label>
+<label>Tolerancia al esfuerzo</label>
 <select id="j5">
-<option value="0">Escasa</option>
-<option value="2">Parcial</option>
+<option value="0">Muy baja</option>
+<option value="2">Moderada</option>
 <option value="4">Alta</option>
 </select>
 
@@ -165,12 +157,12 @@ button {
 function calc(){
 
 if(hemo.value=="no"){
-res.innerHTML="🚫 Paciente no estable → manejo básico, posicionamiento y reevaluación.";
+res.innerHTML="🚫 Paciente no estable → manejo básico y reevaluación.";
 return;
 }
 
 if(acepta.value=="no"){
-res.innerHTML="❌ Paciente no acepta intervención → educación y cierre kinésico.";
+res.innerHTML="❌ Paciente no acepta → educación y cierre kinésico.";
 return;
 }
 
@@ -184,54 +176,66 @@ let total =
 +v4.value +
 juicio;
 
+// eje soporte (para beneficio preventivo)
+let soporte = (+v3.value + +j4.value + +v4.value);
+
 let interpretacion="";
 let objetivos="";
 
 if(total>=40){
-interpretacion="🟢 Alta probabilidad de beneficio kinésico";
+interpretacion="🟢 Alto beneficio rehabilitador";
 
 objetivos=`
-<b>Objetivos terapéuticos:</b>
 <ul>
-<li>Recuperar funcionalidad previa</li>
-<li>Mejorar fuerza y capacidad aeróbica</li>
-<li>Optimizar independencia en AVD</li>
-<li>Prevenir desacondicionamiento</li>
+<li>Recuperar funcionalidad</li>
+<li>Entrenamiento físico progresivo</li>
+<li>Optimizar independencia</li>
 </ul>`;
 }
 
 else if(total>=25){
-interpretacion="🟡 Beneficio posible condicionado";
+interpretacion="🟡 Beneficio intermedio (mixto)";
 
 objetivos=`
-<b>Objetivos terapéuticos:</b>
 <ul>
-<li>Mantener funcionalidad actual</li>
-<li>Prevenir deterioro funcional</li>
-<li>Optimizar movilidad básica</li>
-<li>Educar en autocuidado</li>
+<li>Mantener funcionalidad</li>
+<li>Prevenir deterioro</li>
+<li>Movilidad básica</li>
+<li>Educación terapéutica</li>
 </ul>`;
 }
 
 else{
-interpretacion="🔴 Bajo beneficio esperado";
+if(soporte>=6){
+interpretacion="🔴 Bajo beneficio rehabilitador, pero alto beneficio preventivo";
 
 objetivos=`
-<b>Objetivos terapéuticos:</b>
 <ul>
-<li>Confort y alivio sintomático</li>
 <li>Prevención de complicaciones</li>
 <li>Posicionamiento terapéutico</li>
+<li>Manejo respiratorio/circulatorio</li>
 <li>Educación a cuidador</li>
 </ul>`;
+}
+else{
+interpretacion="⚫ Bajo beneficio global";
+
+objetivos=`
+<ul>
+<li>Confort</li>
+<li>Cuidados básicos</li>
+<li>Reevaluación periódica</li>
+</ul>`;
+}
 }
 
 res.innerHTML = `
 <b>Puntaje:</b> ${total} / 55<br><br>
 <b>${interpretacion}</b><br><br>
+<b>Objetivos terapéuticos:</b>
 ${objetivos}
-<br>
-<i>Usar como apoyo a la decisión clínica.</i>
+<br><br>
+<i>Modelo de doble eje: rehabilitación + prevención</i>
 `;
 }
 </script>
