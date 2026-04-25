@@ -8,6 +8,9 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f2027">
 
+<!-- Excel export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
 body {
     font-family: Arial;
@@ -15,6 +18,7 @@ body {
     color:white;
     padding:20px;
 }
+
 .container {
     max-width:600px;
     margin:auto;
@@ -22,31 +26,36 @@ body {
     padding:20px;
     border-radius:12px;
 }
+
 h1 {
     text-align:center;
     color:#00ffd5;
 }
+
 label {
     display:block;
     margin-top:14px;
     font-weight:bold;
 }
-small {
-    color:#ccc;
-}
-select, button {
+
+small { color:#ccc; }
+
+select, input, button {
     width:100%;
     padding:10px;
     margin-top:5px;
     border-radius:8px;
     border:none;
 }
+
 button {
     background:#00ffd5;
     color:black;
     font-weight:bold;
-    margin-top:20px;
+    margin-top:15px;
+    cursor:pointer;
 }
+
 .result {
     margin-top:20px;
     padding:15px;
@@ -62,15 +71,16 @@ button {
 
 <h1>IPK-R65</h1>
 
+<label>ID Paciente</label>
+<input id="paciente" placeholder="Ej: HSJ-001">
+
 <label>¿Paciente hemodinámicamente estable?</label>
-<small>Filtro de seguridad</small>
 <select id="hemo">
 <option value="no">No estable</option>
 <option value="si">Estable</option>
 </select>
 
 <label>¿Acepta intervención kinésica?</label>
-<small>Viabilidad terapéutica</small>
 <select id="acepta">
 <option value="no">No</option>
 <option value="si">Sí</option>
@@ -91,7 +101,7 @@ button {
 
 <label>Complejidad clínica</label>
 <select id="v2">
-<option value="0">Alta complejidad</option>
+<option value="0">Alta</option>
 <option value="5">Controlada</option>
 <option value="10">Baja</option>
 </select>
@@ -148,102 +158,146 @@ button {
 </select>
 
 <button onclick="calc()">Evaluar paciente</button>
+<button onclick="verHistorial()">Ver historial</button>
+<button onclick="exportarExcel()">Exportar a Excel</button>
 
 <div class="result" id="res"></div>
+<div class="result" id="historial"></div>
 
 </div>
 
 <script>
+
+function guardarEvaluacion(data){
+    let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
+    historial.push(data);
+    localStorage.setItem("ipk_historial", JSON.stringify(historial));
+}
+
 function calc(){
 
-if(hemo.value=="no"){
-res.innerHTML="🚫 Paciente no estable → manejo básico y reevaluación.";
+const hemo = document.getElementById("hemo").value;
+const acepta = document.getElementById("acepta").value;
+
+if(hemo === "no"){
+document.getElementById("res").innerHTML="🚫 Paciente no estable → manejo básico.";
 return;
 }
 
-if(acepta.value=="no"){
-res.innerHTML="❌ Paciente no acepta → educación y cierre kinésico.";
+if(acepta === "no"){
+document.getElementById("res").innerHTML="❌ No acepta intervención → educación.";
 return;
 }
 
-let juicio = +j1.value + +j2.value + +j3.value + +j4.value + +j5.value;
+let j1 = +document.getElementById("j1").value;
+let j2 = +document.getElementById("j2").value;
+let j3 = +document.getElementById("j3").value;
+let j4 = +document.getElementById("j4").value;
+let j5 = +document.getElementById("j5").value;
 
-let total =
-+edad.value +
-+v1.value +
-+v2.value +
-+v3.value +
-+v4.value +
-juicio;
+let juicio = j1 + j2 + j3 + j4 + j5;
 
-// eje soporte (para beneficio preventivo)
-let soporte = (+v3.value + +j4.value + +v4.value);
+let edad = +document.getElementById("edad").value;
+let v1 = +document.getElementById("v1").value;
+let v2 = +document.getElementById("v2").value;
+let v3 = +document.getElementById("v3").value;
+let v4 = +document.getElementById("v4").value;
 
-let interpretacion="";
-let objetivos="";
+let total = edad + v1 + v2 + v3 + v4 + juicio;
+let soporte = v3 + j4 + v4;
 
-if(total>=40){
+let interpretacion = "";
+let objetivos = "";
+
+if(total >= 40){
 interpretacion="🟢 Alto beneficio rehabilitador";
-
-objetivos=`
-<ul>
-<li>Recuperar funcionalidad</li>
-<li>Entrenamiento físico progresivo</li>
-<li>Optimizar independencia</li>
-</ul>`;
+objetivos="Recuperación funcional y entrenamiento progresivo.";
 }
-
-else if(total>=25){
-interpretacion="🟡 Beneficio intermedio (mixto)";
-
-objetivos=`
-<ul>
-<li>Mantener funcionalidad</li>
-<li>Prevenir deterioro</li>
-<li>Movilidad básica</li>
-<li>Educación terapéutica</li>
-</ul>`;
+else if(total >= 25){
+interpretacion="🟡 Beneficio intermedio";
+objetivos="Mantención funcional y prevención de deterioro.";
 }
-
 else{
-if(soporte>=6){
-interpretacion="🔴 Bajo beneficio rehabilitador, pero alto beneficio preventivo";
-
-objetivos=`
-<ul>
-<li>Prevención de complicaciones</li>
-<li>Posicionamiento terapéutico</li>
-<li>Manejo respiratorio/circulatorio</li>
-<li>Educación a cuidador</li>
-</ul>`;
+if(soporte >= 6){
+interpretacion="🔴 Bajo beneficio rehabilitador, alto preventivo";
+objetivos="Prevención de complicaciones y manejo básico.";
 }
 else{
 interpretacion="⚫ Bajo beneficio global";
-
-objetivos=`
-<ul>
-<li>Confort</li>
-<li>Cuidados básicos</li>
-<li>Reevaluación periódica</li>
-</ul>`;
+objetivos="Cuidados básicos y confort.";
 }
 }
 
-res.innerHTML = `
-<b>Puntaje:</b> ${total} / 55<br><br>
+let paciente = document.getElementById("paciente").value || "sin-id";
+
+let evaluacion = {
+paciente,
+fecha: new Date().toISOString(),
+total,
+interpretacion,
+soporte
+};
+
+guardarEvaluacion(evaluacion);
+
+document.getElementById("res").innerHTML = `
+<b>Puntaje:</b> ${total}<br><br>
 <b>${interpretacion}</b><br><br>
-<b>Objetivos terapéuticos:</b>
-${objetivos}
-<br><br>
-<i>Modelo de doble eje: rehabilitación + prevención</i>
+<b>Objetivos:</b> ${objetivos}
 `;
 }
-</script>
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
+function verHistorial(){
+let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
+
+if(historial.length === 0){
+document.getElementById("historial").innerHTML="Sin registros.";
+return;
 }
+
+let html = "<h3>Historial</h3>";
+
+historial.slice().reverse().forEach(h=>{
+html += `
+<div style="padding:10px;margin-bottom:10px;background:#222;border-radius:8px;">
+<b>Paciente:</b> ${h.paciente}<br>
+<b>Fecha:</b> ${new Date(h.fecha).toLocaleString()}<br>
+<b>Puntaje:</b> ${h.total}<br>
+<b>${h.interpretacion}</b>
+</div>`;
+});
+
+document.getElementById("historial").innerHTML = html;
+}
+
+function exportarExcel(){
+
+let historial = JSON.parse(localStorage.getItem("ipk_historial")) || [];
+
+if(historial.length === 0){
+alert("Sin datos");
+return;
+}
+
+let data = historial.map(h=>({
+Paciente: h.paciente,
+Fecha: new Date(h.fecha).toLocaleString(),
+Puntaje: h.total,
+Interpretacion: h.interpretacion,
+Soporte: h.soporte
+}));
+
+let ws = XLSX.utils.json_to_sheet(data);
+let wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "IPK_R65");
+
+XLSX.writeFile(wb, "IPK_R65_historial.xlsx");
+}
+
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('service-worker.js');
+}
+
 </script>
 
 </body>
