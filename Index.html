@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Hospitalario</title>
+<title>IPK-R65 Hospitalario - Sin login</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -93,10 +94,20 @@ button {
     border: 1px solid #1f2d4a;
 }
 
-#userInfo {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #7aa2ff;
+.historial-title {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #00ffd5;
+}
+
+.warning-badge {
+    background: #ff9800;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
 }
 </style>
 </head>
@@ -105,20 +116,7 @@ button {
 
 <div class="container">
 
-<h1>IPK-R65 Hospitalario</h1>
-
-<!-- LOGIN -->
-<div class="section">
-<h3>🔐 Acceso clínico</h3>
-
-<input id="email" placeholder="Correo institucional">
-<input id="pass" type="password" placeholder="Contraseña">
-
-<button class="primary" onclick="login()">Ingresar</button>
-<button class="secondary" onclick="logout()">Cerrar sesión</button>
-
-<div id="userInfo"></div>
-</div>
+<h1>IPK-R65 Hospitalario <span style="font-size:14px;">(sin login | con "No puede consentir")</span></h1>
 
 <!-- PACIENTE -->
 <div class="section">
@@ -126,7 +124,7 @@ button {
 <input id="paciente" placeholder="ID paciente (ej: HSJ-001)">
 </div>
 
-<!-- VARIABLES -->
+<!-- VARIABLES CLÍNICAS (con "No puede consentir") -->
 <div class="section">
 <h3>📊 Variables clínicas</h3>
 
@@ -136,16 +134,17 @@ button {
 <option value="si">Estable</option>
 </select>
 
-<label>Acepta intervención</label>
+<label>Acepta intervención / Puede consentir <span class="warning-badge">NUEVO</span></label>
 <select id="acepta">
 <option value="no">No</option>
 <option value="si">Sí</option>
+<option value="no_puede">No puede consentir</option>
 </select>
 
 <label>Edad funcional</label>
 <select id="edad">
 <option value="0">≥65</option>
-<option value="5"><65</option>
+<option value="5">&lt;65</option>
 </select>
 
 <label>Reserva funcional</label>
@@ -169,32 +168,56 @@ button {
 <option value="5">Fuerte</option>
 </select>
 
-<label>Motivación</label>
+<label>Motivación (si puede colaborar) <span class="warning-badge">NUEVO</span></label>
 <select id="v4">
 <option value="0">Baja</option>
 <option value="3">Variable</option>
 <option value="5">Alta</option>
+<option value="0">No puede colaborar</option>
 </select>
 </div>
 
-<!-- JUICIO CLÍNICO -->
+<!-- JUICIO CLÍNICO (con "No puede colaborar") -->
 <div class="section">
 <h3>🧠 Juicio kinésico</h3>
 
 <label>Edad funcional clínica</label>
-<select id="j1"><option value="0">Baja</option><option value="2">Media</option><option value="4">Alta</option></select>
+<select id="j1">
+<option value="0">Baja</option>
+<option value="2">Media</option>
+<option value="4">Alta</option>
+</select>
 
-<label>Motivación observada</label>
-<select id="j2"><option value="0">Nula</option><option value="2">Parcial</option><option value="4">Alta</option></select>
+<label>Motivación observada (si es aplicable) <span class="warning-badge">NUEVO</span></label>
+<select id="j2">
+<option value="0">Nula</option>
+<option value="2">Parcial</option>
+<option value="4">Alta</option>
+<option value="0">No puede colaborar</option>
+</select>
 
-<label>Adherencia</label>
-<select id="j3"><option value="0">Baja</option><option value="2">Media</option><option value="4">Alta</option></select>
+<label>Adherencia (si puede seguir indicaciones) <span class="warning-badge">NUEVO</span></label>
+<select id="j3">
+<option value="0">Baja</option>
+<option value="2">Media</option>
+<option value="4">Alta</option>
+<option value="0">No puede colaborar</option>
+</select>
 
 <label>Apoyo cuidador</label>
-<select id="j4"><option value="0">Ausente</option><option value="2">Irregular</option><option value="4">Constante</option></select>
+<select id="j4">
+<option value="0">Ausente</option>
+<option value="2">Irregular</option>
+<option value="4">Constante</option>
+</select>
 
-<label>Tolerancia esfuerzo</label>
-<select id="j5"><option value="0">Baja</option><option value="2">Moderada</option><option value="4">Alta</option></select>
+<label>Tolerancia esfuerzo (si puede realizar actividad) <span class="warning-badge">NUEVO</span></label>
+<select id="j5">
+<option value="0">Baja</option>
+<option value="2">Moderada</option>
+<option value="4">Alta</option>
+<option value="0">No puede colaborar</option>
+</select>
 </div>
 
 <!-- ACCIONES -->
@@ -202,194 +225,181 @@ button {
 <button class="primary" onclick="evaluar()">Evaluar y guardar</button>
 <button class="secondary" onclick="verHistorial()">Ver historial</button>
 <button class="secondary" onclick="exportarExcel()">Exportar Excel</button>
+<button class="secondary" onclick="limpiarHistorial()">Limpiar historial</button>
 </div>
 
 <div class="result" id="res"></div>
-<div class="section" id="historial"></div>
+<div id="historial" style="margin-top: 15px;"></div>
 
 </div>
 
-<!-- FIREBASE -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import {
-getAuth,
-signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-getDocs,
-query,
-orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-
-const firebaseConfig = {
-apiKey: "TU_API_KEY",
-authDomain: "irat-5-evaluaciones.firebaseapp.com",
-projectId: "irat-5-evaluaciones",
-storageBucket: "irat-5-evaluaciones.appspot.com",
-messagingSenderId: "487279274410",
-appId: "1:487279274410:web:146e9c35a0bf795c5423d3"
-};
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-window.auth = auth;
-window.db = db;
-window.fb = {
-signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut,
-collection,
-addDoc,
-getDocs,
-query,
-orderBy
-};
-
-</script>
-
-<!-- LOGIC -->
 <script>
+// ======================== SIN FIREBASE ========================
+// Usamos localStorage para guardar evaluaciones localmente
 
-let user = null;
+let historialEvaluaciones = [];
 
-/* AUTH */
-async function login(){
-try{
-await window.fb.signInWithEmailAndPassword(
-window.auth,
-email.value,
-pass.value
-);
-}catch(e){
-alert("Error login");
-}
+// Cargar historial desde localStorage al iniciar
+function cargarHistorialLocal() {
+    const guardado = localStorage.getItem('ipk_historial');
+    if (guardado) {
+        historialEvaluaciones = JSON.parse(guardado);
+    }
 }
 
-async function logout(){
-await window.fb.signOut(window.auth);
+// Guardar historial en localStorage
+function guardarHistorialLocal() {
+    localStorage.setItem('ipk_historial', JSON.stringify(historialEvaluaciones));
 }
 
-window.fb.onAuthStateChanged(window.auth,(u)=>{
-user = u;
-document.getElementById("userInfo").innerHTML =
-u ? "👤 " + u.email : "Sin sesión";
+// Función para guardar evaluación
+async function guardar(data) {
+    historialEvaluaciones.unshift(data); // Agregar al inicio (más reciente primero)
+    guardarHistorialLocal();
+    return true;
+}
+
+function evaluar() {
+    // 1. Verificar estabilidad
+    if (hemo.value === "no") {
+        res.innerHTML = "🚫 Paciente no estable hemodinámicamente. No se puede evaluar.";
+        return;
+    }
+    
+    // 2. Verificar si puede consentir o acepta
+    if (acepta.value === "no") {
+        res.innerHTML = "❌ El paciente NO acepta la intervención. No se puede continuar.";
+        return;
+    }
+    
+    // Si la opción es "no_puede", se continúa pero se ajusta la puntuación automáticamente
+    const noPuedeConsentir = (acepta.value === "no_puede");
+    
+    // Capturar valores (convirtiendo a números)
+    let edadVal = parseInt(edad.value) || 0;
+    let v1Val = parseInt(v1.value) || 0;
+    let v2Val = parseInt(v2.value) || 0;
+    let v3Val = parseInt(v3.value) || 0;
+    let v4Val = parseInt(v4.value) || 0;
+    let j1Val = parseInt(j1.value) || 0;
+    let j2Val = parseInt(j2.value) || 0;
+    let j3Val = parseInt(j3.value) || 0;
+    let j4Val = parseInt(j4.value) || 0;
+    let j5Val = parseInt(j5.value) || 0;
+    
+    // Si el paciente no puede consentir, las variables de motivación/adherencia/tolerancia 
+    // que estén en "No puede colaborar" ya tienen valor 0, pero podemos forzar un mensaje.
+    let total = edadVal + v1Val + v2Val + v3Val + v4Val + j1Val + j2Val + j3Val + j4Val + j5Val;
+    
+    let soporte = v3Val + j4Val + v4Val;
+    
+    let interpretacion = "";
+    
+    if (noPuedeConsentir) {
+        interpretacion = "⚠️ EVALUACIÓN ESPECIAL: El paciente NO PUEDE CONSENTIR. Se evalúa según criterio clínico (familia/cuidador). Puntaje: " + total;
+    } else {
+        if (total >= 40) interpretacion = "🟢 Alto beneficio";
+        else if (total >= 25) interpretacion = "🟡 Intermedio";
+        else if (soporte >= 6) interpretacion = "🔴 Preventivo (requiere soporte)";
+        else interpretacion = "⚫ Bajo global (requiere reevaluación)";
+    }
+    
+    // Verificar si el paciente tiene múltiples "no puede colaborar"
+    let contadorNoPuede = 0;
+    if (v4.value === "0" && document.querySelector('#v4 option:checked')?.text === "No puede colaborar") contadorNoPuede++;
+    if (j2.value === "0" && document.querySelector('#j2 option:checked')?.text === "No puede colaborar") contadorNoPuede++;
+    if (j3.value === "0" && document.querySelector('#j3 option:checked')?.text === "No puede colaborar") contadorNoPuede++;
+    if (j5.value === "0" && document.querySelector('#j5 option:checked')?.text === "No puede colaborar") contadorNoPuede++;
+    
+    let notaAdicional = "";
+    if (contadorNoPuede >= 2) {
+        notaAdicional = " <br>📌 Nota: El paciente presenta limitaciones para colaborar en múltiples ítems. La evaluación refleja el juicio clínico del terapeuta basado en observación indirecta.";
+    }
+    
+    let data = {
+        paciente: paciente.value.trim() || "sin-id",
+        fecha: new Date().toISOString(),
+        total: total,
+        interpretacion: interpretacion,
+        soporte: soporte,
+        noPuedeConsentir: noPuedeConsentir,
+        itemsSinColaboracion: contadorNoPuede
+    };
+    
+    guardar(data);
+    
+    res.innerHTML = `<b>${interpretacion}</b><br>Puntaje total: ${total} puntos${notaAdicional}<br>
+                    <small>⏱️ ${new Date().toLocaleString()}</small>`;
+}
+
+function verHistorial() {
+    if (historialEvaluaciones.length === 0) {
+        document.getElementById("historial").innerHTML = "<div class='card'>📭 No hay evaluaciones guardadas aún.</div>";
+        return;
+    }
+    
+    let html = "<h3 class='historial-title'>📋 Historial clínico</h3>";
+    
+    historialEvaluaciones.forEach((h, idx) => {
+        let fechaMostrar = new Date(h.fecha).toLocaleString();
+        let badge = "";
+        if (h.noPuedeConsentir) {
+            badge = "<span style='background:#ff9800;color:#000;padding:2px 8px;border-radius:12px;font-size:11px;margin-left:8px;'>No puede consentir</span>";
+        }
+        if (h.itemsSinColaboracion > 0) {
+            badge += `<span style='background:#ff5722;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;margin-left:5px;'>${h.itemsSinColaboracion} ítem(s) sin colaboración</span>`;
+        }
+        html += `
+        <div class="card">
+            <b>🧾 ${h.paciente}</b> ${badge}<br>
+            📅 ${fechaMostrar}<br>
+            🎯 Puntaje: ${h.total} - ${h.interpretacion}<br>
+            🤝 Soporte: ${h.soporte} puntos
+        </div>`;
+    });
+    
+    document.getElementById("historial").innerHTML = html;
+}
+
+function exportarExcel() {
+    if (historialEvaluaciones.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
+    
+    let data = historialEvaluaciones.map(h => ({
+        Paciente: h.paciente,
+        Fecha: new Date(h.fecha).toLocaleString(),
+        Puntaje: h.total,
+        Interpretacion: h.interpretacion,
+        "Puntaje Soporte": h.soporte,
+        "No puede consentir": h.noPuedeConsentir ? "Sí" : "No",
+        "Items sin colaboración": h.itemsSinColaboracion
+    }));
+    
+    let ws = XLSX.utils.json_to_sheet(data);
+    let wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "IPK_R65_Evaluaciones");
+    
+    XLSX.writeFile(wb, `IPK_R65_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+}
+
+function limpiarHistorial() {
+    if (confirm("¿Eliminar todo el historial de evaluaciones?")) {
+        historialEvaluaciones = [];
+        guardarHistorialLocal();
+        document.getElementById("historial").innerHTML = "";
+        res.innerHTML = "🧹 Historial limpiado.";
+    }
+}
+
+// Inicializar
+cargarHistorialLocal();
+
+// Mostrar historial automáticamente al cargar
+window.addEventListener('DOMContentLoaded', () => {
+    verHistorial();
 });
-
-/* GUARDAR */
-async function guardar(data){
-if(!user){
-alert("Debe iniciar sesión");
-return;
-}
-
-await window.fb.addDoc(
-window.fb.collection(window.db,"evaluaciones_ipk"),
-{
-...data,
-evaluadorUID:user.uid,
-evaluadorEmail:user.email
-}
-);
-}
-
-/* EVALUAR */
-async function evaluar(){
-
-if(hemo.value==="no"){
-res.innerHTML="🚫 No estable";
-return;
-}
-
-if(acepta.value==="no"){
-res.innerHTML="❌ No acepta intervención";
-return;
-}
-
-let total =
-+edad.value + +v1.value + +v2.value + +v3.value + +v4.value +
-+j1.value + +j2.value + +j3.value + +j4.value + +j5.value;
-
-let soporte = +v3.value + +j4.value + +v4.value;
-
-let interpretacion =
-total>=40 ? "🟢 Alto beneficio" :
-total>=25 ? "🟡 Intermedio" :
-soporte>=6 ? "🔴 Preventivo" :
-"⚫ Bajo global";
-
-let data = {
-paciente:paciente.value || "sin-id",
-fecha:new Date().toISOString(),
-total,
-interpretacion,
-soporte
-};
-
-await guardar(data);
-
-res.innerHTML = `<b>${interpretacion}</b><br>Puntaje: ${total}`;
-}
-
-/* HISTORIAL */
-async function verHistorial(){
-
-let q = window.fb.query(
-window.fb.collection(window.db,"evaluaciones_ipk"),
-window.fb.orderBy("fecha","desc")
-);
-
-let snap = await window.fb.getDocs(q);
-
-let html = "<h3>Historial clínico</h3>";
-
-snap.forEach(d=>{
-let h=d.data();
-html+=`
-<div class="card">
-<b>${h.paciente}</b><br>
-${new Date(h.fecha).toLocaleString()}<br>
-${h.total} - ${h.interpretacion}<br>
-${h.evaluadorEmail}
-</div>`;
-});
-
-historial.innerHTML = html;
-}
-
-/* EXCEL */
-async function exportarExcel(){
-
-let snap = await window.fb.getDocs(
-window.fb.collection(window.db,"evaluaciones_ipk")
-);
-
-let data = snap.docs.map(d=>({
-Paciente:d.data().paciente,
-Fecha:new Date(d.data().fecha).toLocaleString(),
-Puntaje:d.data().total,
-Interpretacion:d.data().interpretacion,
-Soporte:d.data().soporte,
-Evaluador:d.data().evaluadorEmail
-}));
-
-let ws=XLSX.utils.json_to_sheet(data);
-let wb=XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb,ws,"IPK_R65");
-
-XLSX.writeFile(wb,"IPK_R65_hospital.xlsx");
-}
-
 </script>
 
 </body>
