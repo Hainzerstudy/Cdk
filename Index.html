@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Hospitalario - Escala Recalibrada (Menos Intermedios)</title>
+<title>IPK-R65 Hospitalario - Consejos con ejercicios y rehabilitación</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -21,7 +21,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: auto;
     background: #111a2e;
     padding: 25px;
@@ -182,18 +182,37 @@ button:active {
 .consejo-item {
     background: #0f1b33;
     margin: 8px 0;
-    padding: 10px 12px;
+    padding: 12px;
     border-radius: 10px;
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 6px;
     border-left: 3px solid #00ffd5;
 }
 
-.consejo-icon {
-    font-size: 1.1rem;
-    min-width: 24px;
+.consejo-titulo {
+    font-weight: bold;
+    color: #00ffd5;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.consejo-descripcion {
+    font-size: 0.85rem;
+    color: #c2d6ff;
+    line-height: 1.4;
+}
+
+.consejo-ejercicios {
+    font-size: 0.82rem;
+    color: #a9c1ff;
+    background: #0b1220;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-top: 5px;
+    border-left: 2px solid #ffb74d;
 }
 </style>
 </head>
@@ -202,107 +221,108 @@ button:active {
 
 <div class="container">
 <h1>🏥 IPK-R65 Hospitalario</h1>
-<div class="sub">Escala recalibrada | Puntajes más equilibrados | 6 consejos personalizados</div>
+<div class="sub">Escala de predicción kinésica | Descriptores completos + Consejos con ejercicios específicos</div>
 
 <!-- PACIENTE -->
 <div class="section">
 <h3>🧑‍⚕️ Identificación del paciente</h3>
 <input id="paciente" placeholder="Ej: HSJ-042 / Nombre o código" autocomplete="off">
+<div class="option-desc">📌 Ingrese ID, iniciales o número de historia clínica</div>
 </div>
 
-<!-- VARIABLES CLÍNICAS OBJETIVAS - CON NUEVOS PUNTAJES -->
+<!-- VARIABLES CLÍNICAS OBJETIVAS -->
 <div class="section">
 <h3>📊 Variables clínicas basales</h3>
 
 <label>🔻 Estabilidad hemodinámica</label>
 <select id="hemo">
-<option value="no">❌ No estable — Inestabilidad de signos vitales, no movilizar</option>
-<option value="si">✅ Estable — Permite movilización progresiva</option>
+<option value="no">❌ No estable — Inestabilidad de signos vitales (TA, FC, FR alterados), requiere monitoreo continuo, no movilizar</option>
+<option value="si">✅ Estable — TA, FC, FR dentro de parámetros seguros para el reposo y la movilización progresiva</option>
 </select>
 
-<label>🤝 Capacidad de consentir</label>
+<label>🤝 Capacidad de consentir / Colaboración <span class="warning-badge">Informativo, no bloquea</span></label>
 <select id="acepta">
-<option value="si">👍 Sí puede consentir</option>
-<option value="no_puede">🧠 No puede consentir (se evalúa igual)</option>
-<option value="no">🚫 No acepta intervención</option>
+<option value="si">👍 Sí puede consentir — Comprende la información, acepta voluntariamente participar en el plan kinésico</option>
+<option value="no_puede">🧠 No puede consentir — Deterioro cognitivo severo, sedación profunda, trastorno de conciencia (se evalúa con cuidador/familiar)</option>
+<option value="no">🚫 No acepta — Rechaza activamente la intervención kinésica por decisión propia informada</option>
 </select>
 
-<label>📅 Edad funcional (0 o 5 pts)</label>
+<label>📅 Edad funcional (riesgo biológico)</label>
 <select id="edad">
-<option value="0">👴 ≥65 años — Mayor fragilidad (0 pts)</option>
-<option value="5">🧑 &lt;65 años — Menor riesgo (5 pts)</option>
+<option value="0">👴 ≥65 años — Mayor fragilidad asociada, mayor riesgo de sarcopenia, comorbilidades y menor reserva funcional</option>
+<option value="5">🧑 &lt;65 años — Menor riesgo etario, generalmente mejor reserva fisiológica y capacidad de recuperación</option>
 </select>
 
-<label>💪 Reserva funcional (0, 6 o 12 pts)</label>
+<label>💪 Reserva funcional (previo a enfermedad aguda)</label>
 <select id="v1">
-<option value="0">🦽 Severa — Dependiente total (0 pts)</option>
-<option value="6">🚶 Parcial — Requiere ayuda (6 pts)</option>
-<option value="12">🏃 Independiente — Alta reserva (12 pts)</option>
+<option value="0">🦽 Severa — Dependiente para actividades básicas de la vida diaria (ABVD), postrado en cama o silla de ruedas, requiere asistencia total</option>
+<option value="6">🚶 Parcial — Requiere ayuda para algunas actividades como baño, vestimenta o transferencias, deambula con asistencia</option>
+<option value="12">🏃 Independiente — Se moviliza sin asistencia, realiza ABVD solo, vida activa previa a la hospitalización</option>
 </select>
 
-<label>⚙️ Complejidad clínica (0, 6 o 12 pts)</label>
+<label>⚙️ Complejidad clínica (comorbilidades/gravedad)</label>
 <select id="v2">
-<option value="0">🔴 Alta — Múltiples patologías descompensadas (0 pts)</option>
-<option value="6">🟡 Media — Comorbilidades controladas (6 pts)</option>
-<option value="12">🟢 Baja — Buena estabilidad (12 pts)</option>
+<option value="0">🔴 Alta — Múltiples patologías descompensadas (Ej: ICC+EPOC+IRC), alto riesgo de eventos adversos, manejo complejo</option>
+<option value="6">🟡 Media — Comorbilidades controladas con tratamiento, estabilidad clínica relativa, riesgo moderado</option>
+<option value="12">🟢 Baja — Patología única o sin repercusión sistémica importante, buen estado general basal</option>
 </select>
 
-<label>👨‍👩‍👧 Red de apoyo (0, 4 u 8 pts)</label>
+<label>👨‍👩‍👧 Red de apoyo (familiar/cuidador)</label>
 <select id="v3">
-<option value="0">🏚️ Sin apoyo — Vive solo, sin cuidador (0 pts)</option>
-<option value="4">🤝 Parcial — Ayuda intermitente (4 pts)</option>
-<option value="8">🏠 Fuerte — Apoyo continuo (8 pts)</option>
+<option value="0">🏚️ Sin apoyo — Vive solo, sin cuidador formal o informal, dificultad para seguimiento ambulatorio</option>
+<option value="4">🤝 Parcial — Familiar o cuidador que ayuda de forma intermitente, pero con limitaciones de tiempo o capacitación</option>
+<option value="8">🏠 Fuerte — Cuidador presente y entrenado, soporte emocional y logístico continuo, vivienda adaptada</option>
 </select>
 
-<label>🎯 Motivación basal (0, 4 u 8 pts)</label>
+<label>🎯 Motivación basal (disposición para rehabilitación)</label>
 <select id="v4">
-<option value="0">😞 Baja — Poco interés (0 pts)</option>
-<option value="4">🔄 Variable — A veces colabora (4 pts)</option>
-<option value="8">🔥 Alta — Participa activamente (8 pts)</option>
-<option value="0">🚫 No puede colaborar (0 pts)</option>
+<option value="0">😞 Baja — Poco o nulo interés en participar de actividades terapéuticas, actitud pasiva o negativa</option>
+<option value="4">🔄 Variable — A veces colabora, otras no, depende del estímulo o del momento del día</option>
+<option value="8">🔥 Alta — Participa activamente, busca información, muestra entusiasmo por mejorar su condición</option>
+<option value="0">🚫 No puede colaborar — Por déficit neurológico severo, sedación, alteración de conciencia o barrera cognitiva</option>
 </select>
 </div>
 
-<!-- JUICIO CLÍNICO - CON NUEVOS PUNTAJES -->
+<!-- JUICIO CLÍNICO -->
 <div class="section">
-<h3>🧠 Juicio kinésico (evaluador)</h3>
+<h3>🧠 Juicio kinésico (evaluador profesional)</h3>
 
-<label>🧓 Edad funcional clínica (0, 3 o 6 pts)</label>
+<label>🧓 Edad funcional clínica (percepción del kinesiólogo)</label>
 <select id="j1">
-<option value="0">📉 Baja — Se comporta como más frágil (0 pts)</option>
-<option value="3">📊 Media — Acorde a su edad (3 pts)</option>
-<option value="6">📈 Alta — Vitalidad superior (6 pts)</option>
+<option value="0">📉 Baja — El paciente se comporta como muy anciano/frágil, con limitaciones superiores a lo esperado por edad cronológica</option>
+<option value="3">📊 Media — Acorde a su edad cronológica, desempeño funcional esperable</option>
+<option value="6">📈 Alta — Vitalidad y desempeño funcional superior a lo esperado para su edad</option>
 </select>
 
-<label>💡 Motivación observada (0, 3 o 6 pts)</label>
+<label>💡 Motivación observada en sesión (conducta durante evaluación)</label>
 <select id="j2">
-<option value="0">🪨 Nula — Total pasividad (0 pts)</option>
-<option value="3">⚡ Parcial — Reacciona a estímulos (3 pts)</option>
-<option value="6">✨ Alta — Entusiasmo evidente (6 pts)</option>
-<option value="0">❌ No puede colaborar (0 pts)</option>
+<option value="0">🪨 Nula — Total pasividad, sin iniciativa, no responde a estímulos verbales o táctiles</option>
+<option value="3">⚡ Parcial — Reacciona ante estímulos pero no busca activamente participar, requiere constante redirección</option>
+<option value="6">✨ Alta — Entusiasmo evidente, participa voluntariamente, realiza preguntas, busca superarse</option>
+<option value="0">❌ No puede colaborar — Alteración de conciencia, déficit cognitivo severo o condición que impide expresión de motivación</option>
 </select>
 
-<label>🔄 Adherencia a indicaciones (0, 3 o 6 pts)</label>
+<label>🔄 Adherencia a indicaciones (capacidad de seguir órdenes)</label>
 <select id="j3">
-<option value="0">⚠️ Baja — No sigue instrucciones (0 pts)</option>
-<option value="3">📋 Media — Sigue con ayuda (3 pts)</option>
-<option value="6">🧠 Alta — Realiza correctamente (6 pts)</option>
-<option value="0">🚫 No puede colaborar (0 pts)</option>
+<option value="0">⚠️ Baja — No sigue instrucciones, olvida ejercicios, requiere supervisión constante y repetitiva</option>
+<option value="3">📋 Media — Sigue instrucciones con ayuda o recordatorios visuales/verbales, requiere supervisión ocasional</option>
+<option value="6">🧠 Alta — Realiza correctamente los ejercicios sin supervisión, comprende y recuerda las indicaciones</option>
+<option value="0">🚫 No puede colaborar — Imposibilidad por condición clínica (afasia, demencia avanzada, sedación)</option>
 </select>
 
-<label>🤲 Apoyo del cuidador (0, 3 o 6 pts)</label>
+<label>🤲 Apoyo del cuidador (desde perspectiva kinésica)</label>
 <select id="j4">
-<option value="0">❌ Ausente — No hay cuidador (0 pts)</option>
-<option value="3">🕒 Irregular — Apoyo esporádico (3 pts)</option>
-<option value="6">✅ Constante — Cuidador presente (6 pts)</option>
+<option value="0">❌ Ausente — No hay cuidador identificado o no se involucra en el proceso terapéutico</option>
+<option value="3">🕒 Irregular — Apoyo esporádico, poco compromiso con las indicaciones, dificultad para continuidad en domicilio</option>
+<option value="6">✅ Constante — Cuidador presente y entrenado activamente, participa en sesiones, refuerza aprendizajes</option>
 </select>
 
-<label>🏋️ Tolerancia al esfuerzo (0, 3 o 6 pts)</label>
+<label>🏋️ Tolerancia al esfuerzo (respuesta durante actividad física)</label>
 <select id="j5">
-<option value="0">🪫 Baja — Fatiga extrema (0 pts)</option>
-<option value="3">⚖️ Moderada — Completa con pausas (3 pts)</option>
-<option value="6">⚡ Alta — Buen desempeño (6 pts)</option>
-<option value="0">⛔ No puede colaborar (0 pts)</option>
+<option value="0">🪫 Baja — Fatiga extrema, desaturación (SpO2 &lt;88%), disnea intensa, no completa series de ejercicios</option>
+<option value="3">⚖️ Moderada — Se fatiga pero completa ejercicios con pausas, ligera disnea, recuperación en &lt;5 min</option>
+<option value="6">⚡ Alta — Buen desempeño cardiorrespiratorio, sin desaturación, fatiga mínima, completa series sin dificultad</option>
+<option value="0">⛔ No puede colaborar — Paciente no puede realizar esfuerzo dirigido por inestabilidad, dolor severo o indicación médica</option>
 </select>
 </div>
 
@@ -328,104 +348,164 @@ button:active {
 let historialEvaluaciones = [];
 
 function cargarHistorialLocal() {
-    const guardado = localStorage.getItem('ipk_r65_recalibrado');
+    const guardado = localStorage.getItem('ipk_r65_consejos_ejercicios');
     if (guardado) historialEvaluaciones = JSON.parse(guardado);
 }
 
 function guardarHistorialLocal() {
-    localStorage.setItem('ipk_r65_recalibrado', JSON.stringify(historialEvaluaciones));
+    localStorage.setItem('ipk_r65_consejos_ejercicios', JSON.stringify(historialEvaluaciones));
 }
 
-// ========== NUEVA CLASIFICACIÓN CON CORTES MÁS EQUILIBRADOS ==========
-function clasificarPaciente(total, soporte) {
-    // NUEVOS PUNTAJES DE CORTE (escala 0-100)
+// ========== CLASIFICACIÓN ==========
+function clasificarPaciente(total) {
     if (total >= 50) {
-        return { 
-            categoria: "🟢 ALTO BENEFICIO", 
-            color: "#00ffd5",
-            descripcion: "Excelente candidato a rehabilitación intensiva. Pronóstico muy favorable."
-        };
+        return { categoria: "🟢 ALTO BENEFICIO", color: "#00ffd5" };
     } else if (total >= 35) {
-        return { 
-            categoria: "🟡 INTERMEDIO", 
-            color: "#ffd966",
-            descripcion: "Beneficio probable. Requiere ajustes moderados en el plan terapéutico."
-        };
+        return { categoria: "🟡 INTERMEDIO", color: "#ffd966" };
     } else if (total >= 20) {
-        return { 
-            categoria: "🔴 PREVENTIVO/FRÁGIL", 
-            color: "#ffaa66",
-            descripcion: "Requiere soporte y seguimiento estrecho. Enfoque en prevención de deterioro."
-        };
+        return { categoria: "🔴 PREVENTIVO/FRÁGIL", color: "#ffaa66" };
     } else {
-        return { 
-            categoria: "⚫ BAJO GLOBAL", 
-            color: "#cc99ff",
-            descripcion: "Alta complejidad. Optimizar red de apoyo y manejo de comorbilidades antes de rehabilitación."
-        };
+        return { categoria: "⚫ BAJO GLOBAL", color: "#cc99ff" };
     }
 }
 
-// ========== GENERADOR DE 6 CONSEJOS (actualizado) ==========
+// ========== GENERADOR DE 6 CONSEJOS CON AYUDA Y EJERCICIOS ==========
 function generar6Consejos(total, soporte, noPuedeConsentir, noColaboraCount, perfil) {
     const consejos = [];
     
-    // Consejo 1 - Basado en puntaje total (con nuevos rangos)
+    // Consejo 1 - Basado en puntaje total (INTENSIDAD y FRECUENCIA)
     if (total >= 50) {
-        consejos.push("🚀 ALTO BENEFICIO (≥50 pts): Intensificar rehabilitación con 5-7 sesiones semanales, entrenamiento funcional avanzado y ejercicios aeróbicos de moderada a alta intensidad.");
+        consejos.push({
+            titulo: "🏆 ALTA INTENSIDAD - Paciente con alto potencial",
+            ayuda: "Motivar al paciente con metas desafiantes pero alcanzables. Usar refuerzos positivos y gráficos de progreso. Celebrar cada logro.",
+            ejercicios: "Ejercicios: Entrenamiento intervalado de alta intensidad (HIIT) 2-3 min × 4 series. Circuito funcional: sentadillas, step, levantamiento de brazos con resistencia (bandas elásticas), marcha en el lugar 10 min. Frecuencia: 5-7 sesiones/semana."
+        });
     } else if (total >= 35) {
-        consejos.push("📈 BENEFICIO INTERMEDIO (35-49 pts): Programa de rehabilitación de 3-4 sesiones/semana, progresión gradual de cargas, reevaluación en 4 semanas.");
+        consejos.push({
+            titulo: "📈 INTENSIDAD MODERADA - Buen candidato a rehabilitación",
+            ayuda: "Establecer contrato terapéutico con metas semanales. Usar agenda de ejercicios. Involucrar a familiar para refuerzo domiciliario.",
+            ejercicios: "Ejercicios: Fortalecimiento de miembros inferiores (puente, elevación de pierna, mini-sentadilla con soporte). Miembros superiores (lifting de pesas 1-2kg, flexiones de pared). Marcha asistida 15-20 min. Frecuencia: 3-4 sesiones/semana."
+        });
     } else if (total >= 20) {
-        consejos.push("🛡️ PERFIL PREVENTIVO (20-34 pts): Priorizar prevención de caídas, entrenamiento de equilibrio suave y fortalecimiento muscular básico. Aumentar soporte familiar.");
+        consejos.push({
+            titulo: "🛡️ INTENSIDAD BAJA - Enfoque preventivo",
+            ayuda: "Priorizar la seguridad y la confianza. Sesiones cortas pero frecuentes. Explicar cada ejercicio paso a paso. Celebrar pequeños logros.",
+            ejercicios: "Ejercicios: Movilizaciones pasivas y activas asistidas de grandes articulaciones (hombro, cadera, rodilla). Ejercicios respiratorios (respiración diafragmática). Transferencias asistidas (sentado a parado con apoyo). Frecuencia: 2-3 sesiones/semana, sesiones de 15-20 min."
+        });
     } else {
-        consejos.push("🔍 PERFIL COMPLEJO (<20 pts): Reevaluar en 2 semanas. Enfocar en optimización médica, manejo del dolor y soporte psicosocial antes de rehabilitación intensiva.");
+        consejos.push({
+            titulo: "🔍 INTENSIDAD MUY BAJA - Paciente complejo",
+            ayuda: "Enfoque multidisciplinario. Coordinar con médico tratante, terapia ocupacional y trabajo social. Sesiones muy cortas (5-10 min) para evitar sobrecarga.",
+            ejercicios: "Ejercicios: Movilizaciones pasivas suaves en decúbito. Ejercicios isométricos (contracción sin movimiento). Posicionamiento terapéutico para prevenir contracturas y úlceras por presión. Objetivo: mantener rango articular básico."
+        });
     }
     
-    // Consejo 2 - Basado en soporte
+    // Consejo 2 - Basado en soporte y red de apoyo
     if (soporte >= 12) {
-        consejos.push("👨‍👩‍👧‍👦 RED DE APOYO ÓPTIMA: Aprovechar el soporte familiar sólido. Incluir cuidadores en sesiones de entrenamiento y educación continua.");
+        consejos.push({
+            titulo: "👨‍👩‍👧‍👦 RED DE APOYO SÓLIDA - Aprovechar recurso familiar",
+            ayuda: "Capacitar al cuidador principal en técnicas de asistencia y transferencias seguras. Entregar material educativo escrito. Establecer comunicación diaria con el equipo.",
+            ejercicios: "Ejercicios para entrenar con cuidador: Transferencias cama-silla paso a paso, ejercicios de rango de movimiento asistidos, caminata con supervisión, uso correcto de ayudas técnicas (andador, bastón)."
+        });
     } else if (soporte >= 7) {
-        consejos.push("🤝 FORTALECER RED DE APOYO: Coordinar con trabajo social para identificar recursos comunitarios y cuidadores alternantes.");
+        consejos.push({
+            titulo: "🤝 FORTALECER RED DE APOYO - Gestionar recursos",
+            ayuda: "Coordinar con trabajo social para identificar programas de apoyo comunitario, centros de día o cuidadores rotativos. Entregar guías de ejercicios sencillos.",
+            ejercicios: "Ejercicios que el cuidador puede supervisar: Series cortas de ejercicios de pie y sentado (3-5 repeticiones), registro diario de actividad, caminata corta dentro del hogar (5-10 min)."
+        });
     } else {
-        consejos.push("🏠 GESTIÓN DE APOYO URGENTE: Contactar asistente social. Evaluar teleasistencia, internación transitoria o centro de día.");
+        consejos.push({
+            titulo: "🏠 SOPORTE INSUFICIENTE - Gestión prioritaria",
+            ayuda: "Derivación URGENTE a asistente social. Evaluar internación transitoria, teleasistencia diaria o programa de hospital domiciliario. Documentar riesgo de abandono terapéutico.",
+            ejercicios: "Ejercicios autoadministrados con guía por video o folleto ilustrado: Estiramientos basicos en cama, ejercicios respiratorios, movilizaciones de miembros superiores e inferiores en sedestación. Priorizar seguridad."
+        });
     }
     
     // Consejo 3 - Capacidad de consentir
     if (noPuedeConsentir) {
-        consejos.push("🧠 SIN CAPACIDAD DE CONSENTIR: Trabajar con cuidador principal. Sesiones cortas (15-20 min). Registrar voluntades anticipadas.");
+        consejos.push({
+            titulo: "🧠 PACIENTE SIN CAPACIDAD DE CONSENTIR - Estrategia con cuidador",
+            ayuda: "Designar un familiar como 'proxy decisor'. Usar comunicación no verbal para evaluar confort. Sesiones cortas (10-15 min) para evitar sobreestimulación.",
+            ejercicios: "Ejercicios pasivos: Movilizaciones suaves de hombros (flexión, abducción), codos (flexo-extensión), muñecas, cadera (flexión con rodilla flexionada), tobillos (flexo-extensión). 5-8 repeticiones por articulación, 2 series."
+        });
     } else {
-        consejos.push("💬 ESTRATEGIA MOTIVACIONAL: Usar entrevista motivacional. Establecer contrato terapéutico con metas personales del paciente.");
+        consejos.push({
+            titulo: "💬 PACIENTE CON CAPACIDAD DE DECIDIR - Estrategia motivacional",
+            ayuda: "Realizar entrevista motivacional: preguntar sobre metas personales, miedos y expectativas. Establecer metas SMART (específicas, medibles, alcanzables, relevantes, con tiempo).",
+            ejercicios: "Ejercicios con feedback del paciente: Permitir elegir orden de ejercicios, autorregular intensidad según escala de Borg (objetivo 3-4/10), autoevaluación post-sesión. Uso de apps de seguimiento si disponible."
+        });
     }
     
-    // Consejo 4 - Motivación
+    // Consejo 4 - Basado en motivación
     if (perfil.motivacionBaja) {
-        consejos.push("🎯 BAJA MOTIVACIÓN: Estrategias lúdicas, refuerzos positivos inmediatos, metas muy pequeñas diarias, gamificación.");
+        consejos.push({
+            titulo: "🎯 BAJA MOTIVACIÓN - Estrategias conductuales",
+            ayuda: "Usar economía de fichas (acumular puntos por ejercicio completado). Gamificación: competencia consigo mismo, medir pasos/repeticiones. Reforzadores sociales (elogio frecuente).",
+            ejercicios: "Ejercicios lúdicos: Lanzamiento de pelota suave, juegos de equilibrio (pararse en un pie con apoyo), circuito corto con estaciones de colores, música durante ejercicios rítmicos. Premiar con descanso activo."
+        });
     } else if (perfil.motivacionAlta) {
-        consejos.push("🔥 ALTA MOTIVACIÓN: Introducir tecnologías asistivas (apps, wearables), autonomía progresiva, autoevaluación semanal.");
+        consejos.push({
+            titulo: "🔥 ALTA MOTIVACIÓN - Aprovechar entusiasmo",
+            ayuda: "Desafiar con metas progresivas. Entregar responsabilidad: auto-registro de ejercicios domiciliarios. Programar seguimiento con aplicaciones móviles si está disponible.",
+            ejercicios: "Ejercicios avanzados: Subir y bajar escaleras (con baranda), levantarse del suelo sin ayuda, marcha en circuito con obstáculos, entrenamiento de fuerza con bandas de alta resistencia (color rojo/azul)."
+        });
     } else {
-        consejos.push("⚖️ MOTIVACIÓN VARIABLE: Aumentar gradualmente dificultad para mantener interés sin generar frustración.");
+        consejos.push({
+            titulo: "⚖️ MOTIVACIÓN VARIABLE - Flexibilidad terapéutica",
+            ayuda: "Tener plan A, B y C según estado del día. Preguntar al inicio de cada sesión '¿Cómo se siente hoy para trabajar?'. Ofrecer opciones de ejercicios.",
+            ejercicios: "Menú de ejercicios modulares: Módulo suave (movilizaciones, estiramientos), módulo intermedio (fuerza básica), módulo intenso (circuito funcional). El paciente elige 2 de 3 módulos por sesión."
+        });
     }
     
-    // Consejo 5 - Adherencia y tolerancia
+    // Consejo 5 - Basado en adherencia y tolerancia
     if (perfil.adherenciaBaja || perfil.toleranciaBaja) {
-        consejos.push("⏱️ BAJA ADHERENCIA/TOLERANCIA: Sesiones fraccionadas (10-15 min, 3-4 veces/día). Ejercicios en sedestación. Monitorizar fatiga (Borg 3-4/10).");
+        consejos.push({
+            titulo: "⏱️ BAJA ADHERENCIA/TOLERANCIA - Sesiones fraccionadas",
+            ayuda: "Distribuir actividad en micro-sesiones de 5-10 minutos, 4-5 veces al día. Monitorizar signos de fatiga (disnea, frecuencia cardíaca). Usar escala de Borg modificada (0-10).",
+            ejercicios: "Ejercicios en sedestación o decúbito: Flexiones de tobillo (bomba venosa), elevaciones alternas de talones, flexión de rodillas deslizando pie, respiraciones profundas (5-10 repeticiones). Descanso 2 min entre series."
+        });
     } else if (perfil.adherenciaAlta && perfil.toleranciaAlta) {
-        consejos.push("💪 ALTO RENDIMIENTO: Avanzar a ejercicios funcionales complejos (escaleras, levantarse del suelo, marcha comunitaria). Evaluar alta funcional temprana.");
+        consejos.push({
+            titulo: "💪 ALTO RENDIMIENTO - Avanzar funcionalidad",
+            ayuda: "Evaluar para alta a programa ambulatorio o comunitario. Realizar test funcionales (Timed Up and Go, SPPB, test de 6 minutos). Objetivo: independencia funcional total.",
+            ejercicios: "Ejercicios avanzados: Subir 2 pisos por escaleras, levantarse del suelo en < 5 segundos, caminata continua 30 minutos, levantamiento de pesas 3-5 kg (miembros superiores), sentadillas libres, estocadas."
+        });
     } else {
-        consejos.push("📋 ADHERENCIA MODERADA: Diario de entrenamiento. Reevaluación cada 10 sesiones. Involucrar familiar en recordatorios.");
+        consejos.push({
+            titulo: "📋 ADHERENCIA MODERADA - Estrategia mixta",
+            ayuda: "Supervisión intermitente: sesión supervisada 1 vez/semana, resto autoadministrado con telemonitoreo (llamada o mensaje). Usar checklist de cumplimiento.",
+            ejercicios: "Ejercicios progresivos: Semana 1-2: 10 repeticiones × 2 series. Semana 3-4: 12 repeticiones × 3 series. Semana 5-6: añadir resistencia con bandas o peso. Reevaluar cargas cada 10 sesiones."
+        });
     }
     
-    // Consejo 6 - Seguimiento
+    // Consejo 6 - Seguimiento y plan a largo plazo
     if (total >= 50) {
-        consejos.push("🎯 META: Independencia funcional en 4-6 semanas. Derivar a kinesiología ambulatoria. Evaluar cada 2 semanas con SPPB y Timed Up and Go.");
+        consejos.push({
+            titulo: "🎯 PLAN DE ALTA FUNCIONAL - Objetivo independencia",
+            ayuda: "Programar alta a kinesiología ambulatoria en 4-6 semanas. Evaluar cada 2 semanas. Derivar a actividad física comunitaria (gimnasio, taller de ejercicio).",
+            ejercicios: "Ejercicios de mantenimiento: Caminata 30-45 min diarios, entrenamiento de fuerza 2-3 veces/semana (sentadillas, flexiones, plancha adaptada), ejercicios de equilibrio (parada en un pie, talón-punta)."
+        });
     } else if (total >= 35) {
-        consejos.push("📅 PLAN A 8 SEMANAS: Reevaluación intermedia a las 4 semanas. Coordinar con terapia ocupacional si hay déficit asociado.");
+        consejos.push({
+            titulo: "📅 PLAN A 8 SEMANAS - Seguimiento estructurado",
+            ayuda: "Reevaluación intermedia a las 4 semanas con test funcional. Coordinar con terapia ocupacional si hay déficit de actividades instrumentales (cocinar, manejar dinero).",
+            ejercicios: "Ejercicios progresivos mensuales: Mes 1: fortalecimiento básico. Mes 2: entrenamiento funcional. Mes 3: integración a ejercicio comunitario. Revaluar cargas cada 4 semanas."
+        });
     } else {
-        consejos.push("🔄 SEGUIMIENTO ESTRECHO: Revaluación en 3 semanas. Considerar interconsulta a geriatría, medicina física o neurología.");
+        consejos.push({
+            titulo: "🔄 SEGUIMIENTO ESTRECHO - Paciente complejo",
+            ayuda: "Revaluación cada 2-3 semanas. Considerar interconsulta a geriatría, neurología o medicina física. Evaluar necesidad de dispositivos de ayuda (silla de ruedas, grúa, cama hospitalaria).",
+            ejercicios: "Objetivos realistas: Mantener rango articular, prevenir úlceras por presión (cambios posturales cada 2 horas), ejercicios respiratorios para prevenir neumonía. Progresión muy lenta (evaluar cada 2-3 semanas)."
+        });
     }
     
+    // Asegurar 6 consejos
     while (consejos.length < 6) {
-        consejos.push("📌 TELEMONITOREO: Seguimiento telefónico semanal para reforzar adherencia y detectar complicaciones tempranas.");
+        consejos.push({
+            titulo: "📌 TELEMONITOREO Y SEGUIMIENTO",
+            ayuda: "Programar llamada semanal para reforzar adherencia, resolver dudas y detectar complicaciones tempranas (caídas, dolor, fatiga excesiva).",
+            ejercicios: "Ejercicios de recordatorio: Enviar por WhatsApp video corto (1-2 min) de ejercicios clave. Solicitar auto-registro semanal de frecuencia e intensidad."
+        });
     }
     
     return consejos.slice(0, 6);
@@ -446,20 +526,13 @@ function evaluar() {
 
     const noPuedeConsentir = (acepta.value === "no_puede");
 
-    // Cálculo de puntajes (NUEVOS valores)
-    let edadVal = parseInt(edad.value) || 0;
-    let v1Val = parseInt(v1.value) || 0;
-    let v2Val = parseInt(v2.value) || 0;
-    let v3Val = parseInt(v3.value) || 0;
-    let v4Val = parseInt(v4.value) || 0;
-    let j1Val = parseInt(j1.value) || 0;
-    let j2Val = parseInt(j2.value) || 0;
-    let j3Val = parseInt(j3.value) || 0;
-    let j4Val = parseInt(j4.value) || 0;
-    let j5Val = parseInt(j5.value) || 0;
-
-    let total = edadVal + v1Val + v2Val + v3Val + v4Val + j1Val + j2Val + j3Val + j4Val + j5Val;
-    let soporte = v3Val + j4Val + v4Val;
+    // Cálculo de puntajes
+    let total = (parseInt(edad.value)||0) + (parseInt(v1.value)||0) + (parseInt(v2.value)||0) + 
+               (parseInt(v3.value)||0) + (parseInt(v4.value)||0) + (parseInt(j1.value)||0) + 
+               (parseInt(j2.value)||0) + (parseInt(j3.value)||0) + (parseInt(j4.value)||0) + 
+               (parseInt(j5.value)||0);
+    
+    let soporte = (parseInt(v3.value)||0) + (parseInt(j4.value)||0) + (parseInt(v4.value)||0);
 
     // Contar items sin colaboración
     let noColaboraCount = 0;
@@ -473,28 +546,21 @@ function evaluar() {
 
     // Perfil para consejos
     const perfil = {
-        motivacionBaja: (v4Val === 0 && !document.querySelector('#v4 option:checked')?.text.includes("No puede colaborar")) || j2Val === 0,
-        motivacionAlta: v4Val >= 4 || j2Val >= 6,
-        adherenciaBaja: j3Val === 0,
-        adherenciaAlta: j3Val >= 6,
-        toleranciaBaja: j5Val === 0,
-        toleranciaAlta: j5Val >= 6
+        motivacionBaja: (parseInt(v4.value)||0) === 0 && !document.querySelector('#v4 option:checked')?.text.includes("No puede colaborar"),
+        motivacionAlta: (parseInt(v4.value)||0) >= 4,
+        adherenciaBaja: (parseInt(j3.value)||0) === 0,
+        adherenciaAlta: (parseInt(j3.value)||0) >= 6,
+        toleranciaBaja: (parseInt(j5.value)||0) === 0,
+        toleranciaAlta: (parseInt(j5.value)||0) >= 6
     };
 
-    // Clasificación con nuevos cortes
-    const clasificacion = clasificarPaciente(total, soporte);
-
-    // Generar consejos
+    const clasificacion = clasificarPaciente(total);
     const consejos = generar6Consejos(total, soporte, noPuedeConsentir, noColaboraCount, perfil);
 
     // Observaciones
     let observaciones = "";
-    if (noPuedeConsentir) {
-        observaciones += "🧠 Paciente NO PUEDE CONSENTIR. Evaluación mediante cuidador. ";
-    }
-    if (noColaboraCount >= 2) {
-        observaciones += `📌 ${noColaboraCount} ítem(s) con "No puede colaborar". Puntuación refleja juicio clínico.`;
-    }
+    if (noPuedeConsentir) observaciones += "🧠 Paciente NO PUEDE CONSENTIR. Evaluación mediante cuidador. ";
+    if (noColaboraCount >= 2) observaciones += `📌 ${noColaboraCount} ítem(s) con "No puede colaborar".`;
 
     // Guardar
     const data = {
@@ -502,7 +568,6 @@ function evaluar() {
         fecha: new Date().toISOString(),
         total: total,
         categoria: clasificacion.categoria,
-        descripcion: clasificacion.descripcion,
         soporte: soporte,
         noPuedeConsentir: noPuedeConsentir,
         itemsSinColaboracion: noColaboraCount,
@@ -515,9 +580,8 @@ function evaluar() {
 
     // Mostrar resultado
     let htmlResultado = `<strong style="color:${clasificacion.color}">${clasificacion.categoria}</strong><br>`;
-    htmlResultado += `<span style="font-size:0.9rem;">${clasificacion.descripcion}</span><br><br>`;
     htmlResultado += `🎯 <strong>Puntaje IPK-R65:</strong> ${total} puntos (escala 0-100)<br>`;
-    htmlResultado += `🤝 <strong>Puntaje de soporte psicosocial:</strong> ${soporte} pts (máximo 22)<br>`;
+    htmlResultado += `🤝 <strong>Puntaje de soporte psicosocial:</strong> ${soporte} pts<br>`;
     htmlResultado += `<small>🕒 ${new Date().toLocaleString()}</small>`;
     
     if (observaciones) {
@@ -528,8 +592,16 @@ function evaluar() {
     htmlResultado += `<h4>💡 6 RECOMENDACIONES PERSONALIZADAS</h4>`;
     consejos.forEach((consejo, idx) => {
         htmlResultado += `<div class="consejo-item">
-                            <span class="consejo-icon">${idx + 1}️⃣</span>
-                            <span>${consejo}</span>
+                            <div class="consejo-titulo">
+                                <span>${idx + 1}️⃣</span>
+                                <span>${consejo.titulo}</span>
+                            </div>
+                            <div class="consejo-descripcion">
+                                <strong>🤝 Cómo ayudar:</strong> ${consejo.ayuda}
+                            </div>
+                            <div class="consejo-ejercicios">
+                                <strong>🏋️ Ejercicios y rehabilitación:</strong> ${consejo.ejercicios}
+                            </div>
                           </div>`;
     });
     htmlResultado += `</div>`;
@@ -571,18 +643,29 @@ function exportarExcel() {
     const dataExcel = historialEvaluaciones.map(h => ({
         "Paciente": h.paciente,
         "Fecha": new Date(h.fecha).toLocaleString(),
-        "Puntaje total (0-100)": h.total,
+        "Puntaje total": h.total,
         "Categoría": h.categoria,
-        "Descripción": h.descripcion,
         "Soporte psicosocial": h.soporte,
         "No puede consentir": h.noPuedeConsentir ? "Sí" : "No",
         "Observaciones": h.observaciones || "",
-        "Consejo_1": h.consejos?.[0] || "",
-        "Consejo_2": h.consejos?.[1] || "",
-        "Consejo_3": h.consejos?.[2] || "",
-        "Consejo_4": h.consejos?.[3] || "",
-        "Consejo_5": h.consejos?.[4] || "",
-        "Consejo_6": h.consejos?.[5] || ""
+        "Consejo_1_Titulo": h.consejos?.[0]?.titulo || "",
+        "Consejo_1_Ayuda": h.consejos?.[0]?.ayuda || "",
+        "Consejo_1_Ejercicios": h.consejos?.[0]?.ejercicios || "",
+        "Consejo_2_Titulo": h.consejos?.[1]?.titulo || "",
+        "Consejo_2_Ayuda": h.consejos?.[1]?.ayuda || "",
+        "Consejo_2_Ejercicios": h.consejos?.[1]?.ejercicios || "",
+        "Consejo_3_Titulo": h.consejos?.[2]?.titulo || "",
+        "Consejo_3_Ayuda": h.consejos?.[2]?.ayuda || "",
+        "Consejo_3_Ejercicios": h.consejos?.[2]?.ejercicios || "",
+        "Consejo_4_Titulo": h.consejos?.[3]?.titulo || "",
+        "Consejo_4_Ayuda": h.consejos?.[3]?.ayuda || "",
+        "Consejo_4_Ejercicios": h.consejos?.[3]?.ejercicios || "",
+        "Consejo_5_Titulo": h.consejos?.[4]?.titulo || "",
+        "Consejo_5_Ayuda": h.consejos?.[4]?.ayuda || "",
+        "Consejo_5_Ejercicios": h.consejos?.[4]?.ejercicios || "",
+        "Consejo_6_Titulo": h.consejos?.[5]?.titulo || "",
+        "Consejo_6_Ayuda": h.consejos?.[5]?.ayuda || "",
+        "Consejo_6_Ejercicios": h.consejos?.[5]?.ejercicios || ""
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataExcel);
@@ -616,4 +699,4 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 </body>
-    </html>
+</html>
