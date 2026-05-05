@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Hospitalario - 6 Consejos + Descriptores completos</title>
+<title>IPK-R65 Hospitalario - Descriptores en TODAS las opciones</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -76,21 +76,12 @@ select, input {
     border: 1px solid #2b3c5f;
     background: #0b1220;
     color: #e6f1ff;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
 }
 
 select:hover, input:hover {
     border-color: #00ffd5;
-}
-
-.option-desc {
-    font-size: 0.75rem;
-    color: #8aa2e0;
-    margin-top: 4px;
-    margin-bottom: 6px;
-    display: block;
-    line-height: 1.3;
 }
 
 button {
@@ -211,7 +202,7 @@ button:active {
 
 <div class="container">
 <h1>🏥 IPK-R65 Hospitalario</h1>
-<div class="sub">Escala de predicción kinésica | Descriptores clínicos completos + 6 consejos personalizados</div>
+<div class="sub">Escala de predicción kinésica | Descriptores clínicos en TODAS las opciones + 6 consejos personalizados</div>
 
 <!-- PACIENTE -->
 <div class="section">
@@ -229,7 +220,6 @@ button:active {
 <option value="no">❌ No estable — Inestabilidad de signos vitales (TA, FC, FR alterados), requiere monitoreo continuo, no movilizar</option>
 <option value="si">✅ Estable — TA, FC, FR dentro de parámetros seguros para el reposo y la movilización progresiva</option>
 </select>
-<div class="option-desc">📖 Condición cardiovascular/respiratoria que permite o no movilización segura.</div>
 
 <label>🤝 Capacidad de consentir / Colaboración <span class="warning-badge">Informativo, no bloquea</span></label>
 <select id="acepta">
@@ -237,7 +227,6 @@ button:active {
 <option value="no_puede">🧠 No puede consentir — Deterioro cognitivo severo, sedación profunda, trastorno de conciencia (se evalúa con cuidador/familiar)</option>
 <option value="no">🚫 No acepta — Rechaza activamente la intervención kinésica por decisión propia informada</option>
 </select>
-<div class="option-desc">✅ "No puede consentir" NO impide la clasificación. Se registra como observación y se utiliza juicio clínico.</div>
 
 <label>📅 Edad funcional (riesgo biológico)</label>
 <select id="edad">
@@ -340,12 +329,12 @@ button:active {
 let historialEvaluaciones = [];
 
 function cargarHistorialLocal() {
-    const guardado = localStorage.getItem('ipk_r65_historial_descriptores');
+    const guardado = localStorage.getItem('ipk_r65_historial_descriptores_completo');
     if (guardado) historialEvaluaciones = JSON.parse(guardado);
 }
 
 function guardarHistorialLocal() {
-    localStorage.setItem('ipk_r65_historial_descriptores', JSON.stringify(historialEvaluaciones));
+    localStorage.setItem('ipk_r65_historial_descriptores_completo', JSON.stringify(historialEvaluaciones));
 }
 
 // ========== GENERADOR DE 6 CONSEJOS PERSONALIZADOS ==========
@@ -616,4 +605,4 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 </body>
-</html>
+    </html>
