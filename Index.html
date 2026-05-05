@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPK-R65 Hospitalario - Con descriptores clínicos</title>
+<title>IPK-R65 Hospitalario - Clasificación siempre permitida</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -49,7 +49,6 @@ h1 {
     border-radius: 16px;
     margin-bottom: 20px;
     border: 1px solid #1f2d4a;
-    transition: all 0.2s;
 }
 
 .section h3 {
@@ -157,16 +156,6 @@ button:active {
     margin-left: 8px;
 }
 
-.tooltip-info {
-    background: #1f2d4a;
-    border-radius: 30px;
-    padding: 2px 8px;
-    font-size: 0.7rem;
-    color: #bbd9ff;
-    margin-left: 8px;
-    cursor: help;
-}
-
 .flex-buttons {
     display: flex;
     gap: 12px;
@@ -175,6 +164,15 @@ button:active {
 .flex-buttons button {
     flex: 1;
 }
+
+.observation-note {
+    background: #1a2744;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    border-left: 3px solid #ffb74d;
+}
 </style>
 </head>
 
@@ -182,7 +180,7 @@ button:active {
 
 <div class="container">
 <h1>🏥 IPK-R65 Hospitalario</h1>
-<div class="sub">Escala de predicción kinésica | Con descriptores clínicos</div>
+<div class="sub">Escala de predicción kinésica | El paciente SIEMPRE puede ser clasificado</div>
 
 <!-- PACIENTE -->
 <div class="section">
@@ -202,13 +200,13 @@ button:active {
 </select>
 <div class="option-desc">📖 Condición cardiovascular/respiratoria que permite o no movilización.</div>
 
-<label>🤝 Aceptación / Capacidad de consentir <span class="warning-badge">CRÍTICO</span></label>
+<label>🤝 Capacidad de consentir / Colaboración (solo informativo) <span class="warning-badge">No bloquea clasificación</span></label>
 <select id="acepta">
+<option value="si">👍 Sí puede consentir — Comprende y acepta el plan</option>
+<option value="no_puede">🧠 No puede consentir — Deterioro cognitivo, sedación, trastorno de conciencia (se evalúa igual)</option>
 <option value="no">🚫 No acepta — Rechaza activamente la intervención</option>
-<option value="si">👍 Sí acepta — Colabora y comprende el plan</option>
-<option value="no_puede">🧠 No puede consentir — Deterioro cognitivo, sedación, trastorno de conciencia</option>
 </select>
-<div class="option-desc">⚠️ Si el paciente NO PUEDE CONSENTIR, se evaluará mediante cuidador/familiar y juicio clínico.</div>
+<div class="option-desc">✅ La opción "No puede consentir" NO impide la clasificación. Solo se registra como observación clínica.</div>
 
 <label>📅 Edad funcional (riesgo biológico)</label>
 <select id="edad">
@@ -237,14 +235,13 @@ button:active {
 <option value="5">🏠 Fuerte — Cuidador presente y entrenado, soporte continuo</option>
 </select>
 
-<label>🎯 Motivación basal (si puede expresar) <span class="warning-badge">+ No colabora</span></label>
+<label>🎯 Motivación basal</label>
 <select id="v4">
 <option value="0">😞 Baja — Poco interés en rehabilitación</option>
 <option value="3">🔄 Variable — A veces colabora, otras no</option>
 <option value="5">🔥 Alta — Participa activamente</option>
 <option value="0">🚫 No puede colaborar — Por déficit neurológico, sedación, alteración conciencia</option>
 </select>
-<div class="option-desc">En caso de “No puede colaborar” se registra como 0 puntos y se ajusta la interpretación.</div>
 </div>
 
 <!-- JUICIO CLÍNICO (SUBJETIVO DEL KINESIÓLOGO) -->
@@ -258,7 +255,7 @@ button:active {
 <option value="4">📈 Alta — Vitalidad superior a lo esperado</option>
 </select>
 
-<label>💡 Motivación observada en sesión <span class="warning-badge">+ No colabora</span></label>
+<label>💡 Motivación observada en sesión</label>
 <select id="j2">
 <option value="0">🪨 Nula — Total pasividad, sin iniciativa</option>
 <option value="2">⚡ Parcial — Reacciona ante estímulos pero no busca</option>
@@ -266,7 +263,7 @@ button:active {
 <option value="0">❌ No puede colaborar — Alteración conciencia / déficit grave</option>
 </select>
 
-<label>🔄 Adherencia a indicaciones <span class="warning-badge">+ No colabora</span></label>
+<label>🔄 Adherencia a indicaciones</label>
 <select id="j3">
 <option value="0">⚠️ Baja — No sigue instrucciones, olvida ejercicios</option>
 <option value="2">📋 Media — Sigue con ayuda o recordatorios</option>
@@ -281,7 +278,7 @@ button:active {
 <option value="4">✅ Constante — Cuidador presente y entrenado activamente</option>
 </select>
 
-<label>🏋️ Tolerancia al esfuerzo (respuesta durante terapia) <span class="warning-badge">+ No colabora</span></label>
+<label>🏋️ Tolerancia al esfuerzo (respuesta durante terapia)</label>
 <select id="j5">
 <option value="0">🪫 Baja — Fatiga extrema, desatura o no completa ejercicios</option>
 <option value="2">⚖️ Moderada — Se fatiga pero completa con pausas</option>
@@ -308,16 +305,16 @@ button:active {
 </div>
 
 <script>
-// ========== SIN LOGIN, almacenamiento local con descriptores ==========
+// ========== SIN LOGIN, almacenamiento local ==========
 let historialEvaluaciones = [];
 
 function cargarHistorialLocal() {
-    const guardado = localStorage.getItem('ipk_r65_historial');
+    const guardado = localStorage.getItem('ipk_r65_historial_v2');
     if (guardado) historialEvaluaciones = JSON.parse(guardado);
 }
 
 function guardarHistorialLocal() {
-    localStorage.setItem('ipk_r65_historial', JSON.stringify(historialEvaluaciones));
+    localStorage.setItem('ipk_r65_historial_v2', JSON.stringify(historialEvaluaciones));
 }
 
 async function guardar(data) {
@@ -329,22 +326,22 @@ async function guardar(data) {
 function evaluar() {
     const resDiv = document.getElementById("res");
 
-    // 1. Estabilidad
+    // 1. Verificar estabilidad (SÍ bloquea - criterio de seguridad)
     if (hemo.value === "no") {
-        resDiv.innerHTML = "⛔ PACIENTE NO ESTABLE HEMODINÁMICAMENTE. No se recomienda evaluación kinésica intervencionista ahora.";
+        resDiv.innerHTML = "⛔ PACIENTE NO ESTABLE HEMODINÁMICAMENTE. No se recomienda evaluación kinésica intervencionista en este momento. Estabilice primero.";
         return;
     }
 
-    // 2. Consentimiento
-    const aceptaVal = acepta.value;
-    if (aceptaVal === "no") {
-        resDiv.innerHTML = "❌ El paciente NO ACEPTA la intervención. Se respeta su decisión. No continuar.";
+    // 2. Verificar rechazo activo (SÍ bloquea - respeto autonomía)
+    if (acepta.value === "no") {
+        resDiv.innerHTML = "❌ El paciente RECHAZA ACTIVAMENTE la intervención. Se respeta su decisión. No continuar con la clasificación funcional.";
         return;
     }
 
-    const noPuedeConsentir = (aceptaVal === "no_puede");
+    // La opción "no_puede" NO bloquea, solo registra observación
+    const noPuedeConsentir = (acepta.value === "no_puede");
 
-    // Capturar valores
+    // Capturar valores numéricos
     let edadVal = parseInt(edad.value) || 0;
     let v1Val = parseInt(v1.value) || 0;
     let v2Val = parseInt(v2.value) || 0;
@@ -359,31 +356,41 @@ function evaluar() {
     let total = edadVal + v1Val + v2Val + v3Val + v4Val + j1Val + j2Val + j3Val + j4Val + j5Val;
     let soporte = v3Val + j4Val + v4Val;
 
-    // Contar items con "No puede colaborar"
+    // Contar items con "No puede colaborar" (solo informativo)
     let noColaboraCount = 0;
     const selectoresNoColaboracion = [v4, j2, j3, j5];
-    const textosNoColaboracion = ["No puede colaborar", "No puede colaborar", "No puede colaborar", "No puede colaborar"];
     for (let i = 0; i < selectoresNoColaboracion.length; i++) {
-        if (selectoresNoColaboracion[i].options[selectoresNoColaboracion[i].selectedIndex]?.text.includes("No puede colaborar")) {
+        const selectedText = selectoresNoColaboracion[i].options[selectoresNoColaboracion[i].selectedIndex]?.text;
+        if (selectedText && selectedText.includes("No puede colaborar")) {
             noColaboraCount++;
         }
     }
 
+    // Clasificación según puntaje (SIEMPRE se calcula)
     let interpretacion = "";
-    let notaExtra = "";
-
-    if (noPuedeConsentir) {
-        interpretacion = `⚠️ PACIENTE SIN CAPACIDAD DE CONSENTIR. Evaluación basada en observación clínica y cuidador. Puntaje: ${total}`;
-        notaExtra = "🧠 Se respeta imposibilidad de decidir; el kinesiólogo registra según mejor juicio.";
+    let color = "";
+    
+    if (total >= 40) {
+        interpretacion = "🟢 ALTO BENEFICIO — Excelente candidato a rehabilitación intensiva";
+        color = "green";
+    } else if (total >= 25) {
+        interpretacion = "🟡 INTERMEDIO — Beneficio probable, ajustar estrategias según perfil";
+        color = "gold";
+    } else if (soporte >= 6) {
+        interpretacion = "🔴 PREVENTIVO/FRAGIL — Requiere soporte y seguimiento estrecho, pero puede beneficiarse";
+        color = "orange";
     } else {
-        if (total >= 40) interpretacion = "🟢 ALTO BENEFICIO — Excelente candidato a rehabilitación intensiva";
-        else if (total >= 25) interpretacion = "🟡 INTERMEDIO — Beneficio probable, ajustar estrategias";
-        else if (soporte >= 6) interpretacion = "🔴 PREVENTIVO — Requiere soporte y seguimiento estrecho";
-        else interpretacion = "⚫ BAJO GLOBAL — Reevaluar y optimizar red de apoyo / motivación";
+        interpretacion = "⚫ BAJO GLOBAL — Alta complejidad, reevaluar y optimizar red de apoyo / motivación";
+        color = "gray";
     }
 
+    // Construir observaciones clínicas adicionales
+    let observaciones = "";
+    if (noPuedeConsentir) {
+        observaciones += "🧠 El paciente NO PUEDE CONSENTIR (deterioro cognitivo/sedación). La evaluación se realizó mediante juicio clínico y/o cuidador. ";
+    }
     if (noColaboraCount >= 2) {
-        notaExtra += `<br>📌 <strong>Nota clínica:</strong> El paciente presenta ${noColaboraCount} ítem(s) con "No puede colaborar" (motivación/adherencia/tolerancia). La puntuación refleja limitación basal.`;
+        observaciones += `📌 El paciente presenta ${noColaboraCount} ítem(s) con "No puede colaborar" (motivación/adherencia/tolerancia). La puntuación refleja evaluación clínica objetiva.`;
     }
 
     const data = {
@@ -394,13 +401,22 @@ function evaluar() {
         soporte: soporte,
         noPuedeConsentir: noPuedeConsentir,
         itemsSinColaboracion: noColaboraCount,
-        puntajesDetalle: { edad: edadVal, reserva: v1Val, complejidad: v2Val, redApoyo: v3Val, motivacionBase: v4Val,
-                           juicioEdad: j1Val, motivacionObs: j2Val, adherencia: j3Val, apoyoCuidador: j4Val, tolerancia: j5Val }
+        observaciones: observaciones
     };
 
     guardar(data);
 
-    resDiv.innerHTML = `<strong>${interpretacion}</strong><br>🎯 Puntaje IPK-R65: ${total} / 72 aprox<br>🤝 Soporte total: ${soporte} pts<br>${notaExtra}<br><small>🕒 ${new Date().toLocaleString()}</small>`;
+    // Mostrar resultado
+    let htmlResultado = `<strong style="color:${color}">${interpretacion}</strong><br>`;
+    htmlResultado += `🎯 <strong>Puntaje IPK-R65:</strong> ${total} puntos<br>`;
+    htmlResultado += `🤝 <strong>Puntaje de soporte</strong> (red+cuidador+motivación): ${soporte} pts<br>`;
+    htmlResultado += `<small>🕒 ${new Date().toLocaleString()}</small>`;
+    
+    if (observaciones) {
+        htmlResultado += `<div class="observation-note">📋 <strong>Observación clínica:</strong><br>${observaciones}</div>`;
+    }
+    
+    resDiv.innerHTML = htmlResultado;
 }
 
 function verHistorial() {
@@ -416,12 +432,16 @@ function verHistorial() {
         let badges = "";
         if (h.noPuedeConsentir) badges += "<span style='background:#ff9800;padding:2px 8px;border-radius:16px;font-size:11px;margin-right:6px;'>⚠️ No puede consentir</span>";
         if (h.itemsSinColaboracion > 0) badges += `<span style='background:#ff5722;padding:2px 8px;border-radius:16px;font-size:11px;'>🚫 ${h.itemsSinColaboracion} sin colaboración</span>`;
+        
+        let observacionPreview = h.observaciones ? h.observaciones.substring(0, 80) + (h.observaciones.length > 80 ? "…" : "") : "";
+        
         html += `
         <div class="card">
             <div><b>🧾 ${escapeHtml(h.paciente)}</b> ${badges}</div>
             <div>📆 ${fechaStr}</div>
-            <div>📊 Puntaje: ${h.total} | ${h.interpretacion.substring(0, 70)}${h.interpretacion.length>70?'…':''}</div>
-            <div>👥 Soporte (red+cuidador+motivación): ${h.soporte} pts</div>
+            <div><strong>Puntaje: ${h.total}</strong> | ${h.interpretacion.substring(0, 60)}</div>
+            <div>🤝 Soporte: ${h.soporte} pts</div>
+            ${observacionPreview ? `<div><small>📝 ${escapeHtml(observacionPreview)}</small></div>` : ""}
         </div>`;
     });
     historialDiv.innerHTML = html;
@@ -440,7 +460,8 @@ function exportarExcel() {
         "Interpretación": h.interpretacion,
         "Soporte (red+cuidador+motivación)": h.soporte,
         "No puede consentir": h.noPuedeConsentir ? "Sí" : "No",
-        "Ítems sin colaboración": h.itemsSinColaboracion
+        "Ítems sin colaboración": h.itemsSinColaboracion,
+        "Observaciones clínicas": h.observaciones || ""
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataExcel);
@@ -454,11 +475,12 @@ function limpiarHistorial() {
         historialEvaluaciones = [];
         guardarHistorialLocal();
         document.getElementById("historial").innerHTML = "";
-        document.getElementById("res").innerHTML = "🧹 Historial completamente limpiado.";
+        document.getElementById("res").innerHTML = "🧹 Historial completamente limpiado. Puede comenzar nuevas evaluaciones.";
     }
 }
 
 function escapeHtml(str) {
+    if (!str) return "";
     return str.replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
